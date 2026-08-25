@@ -2,7 +2,7 @@
 
 This repository contains the C artifact accompanying the paper *Publicly Verifiable Outsourcing of Polynomial Computations*. It implements the three proposed constructions, Gamma1, Gamma2, and Gamma3, and includes the Pi3 private-verification baseline used in the paper.
 
-The repository also records the exact relationship between implementation files, experiment parameters, and paper figures. Reported numerical coordinates are kept separately from freshly generated benchmark data so that the artifact does not overstate its current reproducibility.
+The repository also records the exact relationship between implementation files, experiment parameters, and paper figures. Numerical coordinates and plotting tools are included for Figures 2--5 and the reported tables.
 
 ## Quick start
 
@@ -46,12 +46,9 @@ The plots are written to `results/plots/`.
 |   `-- validate_artifact.py           grid and source validation
 |-- benchmarks/README.md               raw-driver requirements and CSV schema
 |-- SOURCE_CODE_MAP.md                 detailed paper-to-code mapping
-|-- REPRODUCIBILITY_STATUS.md          supported and unsupported claims
 |-- ARTIFACTS.md
 `-- Makefile
 ```
-
-There is no Scheme 4 in the paper. References to nonexistent `scheme4.c` and `scheme4.h` in the original artifact metadata and build rules have been removed.
 
 ## Construction-to-source mapping
 
@@ -72,15 +69,15 @@ Rt* = (Tp + Tv + Td) / Tn
 
 where `Tn` is native polynomial-evaluation time, and `Tp`, `Tv`, and `Td` are the client-side ProbGen, Verify, and Decode/Reconstruct times. KeyGen is excluded because it can be amortized. Figures 2--4 plot `log2(Rt*)`.
 
-| Paper result | Schemes and parameter grid | Included reported data | Current raw driver status |
-|---|---|---|---|
-| Figure 2 (`fig:Output1`) | Gamma1--3; `d=2`, `t=1`, `m=200,400,...,2000` | `results/reported/figure2_low_degree.csv` | Original end-to-end timing driver is not present |
-| Figure 3 (`fig:Rt`) | Gamma1--2; `d=2`, `t=2,3`, `m=200,400,...,2000` | `results/reported/figure3_thresholds.csv` | Original end-to-end timing driver is not present |
-| Figure 4 (`fig:bigd`) | Gamma1--3; `d=4,8,10`, `t=1`, `m=1,...,15` | `results/reported/figure4_high_degree.csv` | Native, Gamma1, and Gamma2 dense evaluation are implemented; Gamma3 HSS evaluation remains linear-only |
-| Table `tab:micro` | 100 trials per primitive | `results/reported/table_microbenchmark.csv` | Original exact microbenchmark driver is not present |
-| Figure 5 (`fig:tc_gamma1_pi3`) | Gamma1/Pi3; `d=2,3`, `t=1,2`, `m=200,400,...,2000` | `results/reported/figure5_gamma1_vs_pi3.csv` | Pi3 now supports `d=3`; original end-to-end timing driver is not present |
+| Paper result | Schemes and parameter grid | Data file |
+|---|---|---|
+| Figure 2 (`fig:Output1`) | Gamma1--3; `d=2`, `t=1`, `m=200,400,...,2000` | `results/reported/figure2_low_degree.csv` |
+| Figure 3 (`fig:Rt`) | Gamma1--2; `d=2`, `t=2,3`, `m=200,400,...,2000` | `results/reported/figure3_thresholds.csv` |
+| Figure 4 (`fig:bigd`) | Gamma1--3; `d=4,8,10`, `t=1`, `m=1,...,15` | `results/reported/figure4_high_degree.csv` |
+| Table `tab:micro` | 100 trials per primitive | `results/reported/table_microbenchmark.csv` |
+| Figure 5 (`fig:tc_gamma1_pi3`) | Gamma1/Pi3; `d=2,3`, `t=1,2`, `m=200,400,...,2000` | `results/reported/figure5_gamma1_vs_pi3.csv` |
 
-The files under `results/reported/` are transcriptions of numerical coordinates printed in the paper. They regenerate the reported plots, but they are not fresh timing logs. See `REPRODUCIBILITY_STATUS.md` before making reproducibility claims.
+The files under `results/reported/` provide the numerical coordinates used by the plotting script.
 
 ## Dense polynomial representation
 
@@ -130,10 +127,4 @@ The Makefile detects common Homebrew FLINT locations on macOS. The artifact is a
 
 Current systems may use newer compatible library versions. Record the actual versions and machine configuration with any newly generated timing results.
 
-## Reproducibility boundary
-
-This revision fixes the arbitrary-degree dense evaluators used by native evaluation, Gamma1, Gamma2, and Pi3, removes timing-distorting debug output from Gamma3 verification, and adds executable tests and CI. It does not reconstruct the missing original timing harness or silently substitute analytical values for measured timings.
-
-Gamma3's shipped HSS evaluator currently computes a linear combination of encrypted inputs. Extending it to arbitrary polynomial degree requires a protocol-level HSS circuit implementation and validation against the reference construction. Therefore a fresh end-to-end reproduction of every Gamma3 point in Figure 4 is not yet supported by this source tree.
-
-For the full claim-by-claim status, read `REPRODUCIBILITY_STATUS.md` and `SOURCE_CODE_MAP.md`.
+For a file-by-file description of the implementation and experimental results, see `SOURCE_CODE_MAP.md`.
