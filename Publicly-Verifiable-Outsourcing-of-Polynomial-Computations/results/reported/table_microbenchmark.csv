@@ -1,0 +1,7 @@
+operation,reported_cost,seconds
+Add_q,49 ns,4.9e-08
+Mul_q,359 ns,3.59e-07
+Add_q2,101 ns,1.01e-07
+Mul_q2,1528 ns,1.528e-06
+Exp_G,3820 ns,3.82e-06
+T_Paillier,51 ms,0.051
