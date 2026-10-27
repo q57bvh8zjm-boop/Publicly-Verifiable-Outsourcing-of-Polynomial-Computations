@@ -14,7 +14,6 @@ Generate new measurements:
 
 ```sh
 python3 scripts/run_experiments.py --profile smoke --trials 3 --output results/measured/local-review
-make var_benchmark
 ```
 
 Inspect `raw.csv`, individual trial files, and `metadata.json`. The benchmark records setup, query generation, server work, verification, reconstruction, and native evaluation separately. It stops on a failed correctness check.
