@@ -1,0 +1,22 @@
+{
+  "environment_label": "local-tcp-functional-test",
+  "require_distinct_hosts": false,
+  "require_client_separate": false,
+  "servers": [
+    {
+      "server_id": 0,
+      "host": "127.0.0.1",
+      "port": 19100
+    },
+    {
+      "server_id": 1,
+      "host": "127.0.0.1",
+      "port": 19101
+    },
+    {
+      "server_id": 2,
+      "host": "127.0.0.1",
+      "port": 19102
+    }
+  ]
+}
