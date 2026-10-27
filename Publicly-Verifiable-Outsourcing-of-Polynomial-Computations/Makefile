@@ -46,9 +46,6 @@ check: validate all test
 
 benchmark: $(BUILD_DIR)/benchmark
 
-var_benchmark: $(BUILD_DIR)/benchmark
-	$(BUILD_DIR)/benchmark Gamma_OV_Sh 4 2 1 3 var
-
 reported-plots:
 	python3 scripts/plot_reported_results.py
 
@@ -76,4 +73,4 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 -include $(COMMON_OBJ:.o=.d) $(CORE_OBJ:.o=.d)
-.PHONY: all core test test-hss test-hss-high validate check benchmark var_benchmark reported-plots figures figure2 figure3 figure4 figure5 clean
+.PHONY: all core test test-hss test-hss-high validate check benchmark reported-plots figures figure2 figure3 figure4 figure5 clean
