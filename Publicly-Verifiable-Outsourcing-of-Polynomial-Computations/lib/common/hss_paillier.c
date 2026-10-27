@@ -25,7 +25,7 @@ static unsigned ceil_log2_u64(uint64_t n) {
     return bits;
 }
 
-static void encrypt(fmpz_t out, const fmpz_t message, const hss_public_key *pk) {
+void hss_paillier_encrypt(fmpz_t out, const fmpz_t message, const hss_public_key *pk) {
     fmpz_t r, gcd, lift;
     fmpz_init(r); fmpz_init(gcd); fmpz_init(lift);
     do {
@@ -87,7 +87,7 @@ int hss_setup(hss_public_key *pk, hss_evaluation_key ek[2], const pubpar *par) {
         fmpz_init(ek[0].digits[i]); fmpz_init(ek[1].digits[i]);
         fmpz_mod(digit, remainder, base);
         fmpz_fdiv_q_2exp(remainder, remainder, pk->base_bits);
-        encrypt(pk->encrypted_digits[i], digit, pk);
+        hss_paillier_encrypt(pk->encrypted_digits[i], digit, pk);
         pv_random_below(ek[0].digits[i], share_bound);
         fmpz_add(ek[1].digits[i], ek[0].digits[i], digit);
     }
@@ -105,9 +105,9 @@ void hss_input(hss_ciphertext *out, const hss_public_key *pk, const fq_t input,
     fmpz_t value, zero, rerandomization;
     fmpz_init(value); fmpz_init(zero); fmpz_init(rerandomization);
     fq2fmpz(value, input, field);
-    encrypt(out->c[0], value, pk);
+    hss_paillier_encrypt(out->c[0], value, pk);
     for (unsigned i = 0; i < pk->digit_count; i++) {
-        encrypt(rerandomization, zero, pk);
+        hss_paillier_encrypt(rerandomization, zero, pk);
         fmpz_powm(out->c[i+1], pk->encrypted_digits[i], value, pk->n2);
         fmpz_mul(out->c[i+1], out->c[i+1], rerandomization);
         fmpz_mod(out->c[i+1], out->c[i+1], pk->n2);

@@ -26,6 +26,9 @@ void hss_evaluation_key_clear(hss_evaluation_key *ek);
 void hss_input(hss_ciphertext *out, const hss_public_key *pk, const fq_t input,
                 const fq_ctx_t field);
 void hss_ciphertext_clear(hss_ciphertext *ct);
+/* One ordinary randomized Paillier encryption, for the primitive microbenchmark.
+ * HSS Input calls this repeatedly and also evaluates encrypted key digits. */
+void hss_paillier_encrypt(fmpz_t out, const fmpz_t message, const hss_public_key *pk);
 int hss_eval(fq_t out, int server, const hss_public_key *pk,
              const hss_evaluation_key *ek, hss_ciphertext *inputs,
              fq_mat_t polynomial, pubpar *par);

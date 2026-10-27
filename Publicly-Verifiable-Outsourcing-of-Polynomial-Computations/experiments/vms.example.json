@@ -1,0 +1,62 @@
+{
+  "environment_label": "paper-independent-vms",
+  "require_distinct_hosts": true,
+  "require_client_separate": true,
+  "servers": [
+    {
+      "server_id": 0,
+      "host": "192.168.56.101",
+      "port": 9100
+    },
+    {
+      "server_id": 1,
+      "host": "192.168.56.102",
+      "port": 9100
+    },
+    {
+      "server_id": 2,
+      "host": "192.168.56.103",
+      "port": 9100
+    },
+    {
+      "server_id": 3,
+      "host": "192.168.56.104",
+      "port": 9100
+    },
+    {
+      "server_id": 4,
+      "host": "192.168.56.105",
+      "port": 9100
+    },
+    {
+      "server_id": 5,
+      "host": "192.168.56.106",
+      "port": 9100
+    },
+    {
+      "server_id": 6,
+      "host": "192.168.56.107",
+      "port": 9100
+    },
+    {
+      "server_id": 7,
+      "host": "192.168.56.108",
+      "port": 9100
+    },
+    {
+      "server_id": 8,
+      "host": "192.168.56.109",
+      "port": 9100
+    },
+    {
+      "server_id": 9,
+      "host": "192.168.56.110",
+      "port": 9100
+    },
+    {
+      "server_id": 10,
+      "host": "192.168.56.111",
+      "port": 9100
+    }
+  ]
+}

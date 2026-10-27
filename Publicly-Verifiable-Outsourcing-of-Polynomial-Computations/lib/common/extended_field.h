@@ -189,4 +189,8 @@ long long ext_field_get_base_mul_count(void);
  */
 void ext_field_reset_counters(void);
 
+void ext_field_ctx_init_default(ext_field_ctx_t *field, const fmpz_t prime);
+void ext_field_interpolate(ext_field_elem_t *coefficients, ext_field_elem_t *values,
+                           int k, const ext_field_ctx_t *field);
+
 #endif // EXTENDED_FIELD_H

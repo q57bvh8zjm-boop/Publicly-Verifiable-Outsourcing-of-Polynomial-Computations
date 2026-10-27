@@ -4,6 +4,36 @@
 #include "gamma_fe_sh.h"
 #include "gamma_ov_sh.h"
 #include "gamma_ov_hss.h"
+#include "pi3.h"
+
+static void check_pi3(fq_mat_t F, fq_mat_t x, pubpar *p) {
+    pi3_probgen_out request;
+    assert(pi3_probgen(&request, x, p));
+    ext_field_elem_t *responses = pv_alloc(p->k, sizeof(*responses));
+    for (int i = 0; i < p->k; i++) {
+        ext_field_elem_init(&responses[i]);
+        pi3_compute(&responses[i], F, &request.shares[i], &request.field, p);
+    }
+    pi3_verify_out verified;
+    assert(pi3_verify(&verified, &request, responses, p));
+    fq_t actual, expected;
+    fq_init(actual, p->Fp);
+    Eval(expected, F, x, p);
+    assert(pi3_decode(actual, &verified, p));
+    assert(fq_equal(actual, expected, p->Fp));
+    pi3_verify_out_clear(&verified);
+    for (int i = 0; i < p->k; i++) {
+        fmpz_add_ui(responses[i].b, responses[i].b, 1);
+        fmpz_mod(responses[i].b, responses[i].b, p->p);
+    }
+    assert(!pi3_verify(&verified, &request, responses, p));
+    assert(!pi3_decode(actual, &verified, p));
+    pi3_verify_out_clear(&verified);
+    for (int i = 0; i < p->k; i++) ext_field_elem_clear(&responses[i]);
+    free(responses);
+    fq_clear(actual, p->Fp); fq_clear(expected, p->Fp);
+    pi3_probgen_out_clear(&request);
+}
 
 static void example(fq_mat_t F, fq_mat_t x, pubpar *p, int random) {
     for (slong i=0; i<fq_mat_nrows(F,p->Fp); i++) {
@@ -140,11 +170,11 @@ int main(int argc, char **argv) {
         pubpar p; assert(pv_params_init(&p,d<=3?2:1,d,t));
         fq_mat_t F,x; fq_mat_init(F,mpoly_num_coefficients(p.m,d),1,p.Fp);
         fq_mat_init(x,p.m,1,p.Fp);
-        for (int trial=0;trial<2;trial++) { example(F,x,&p,trial); check_fe(F,x,&p); check_ov(F,x,&p); }
-        fq_mat_zero(F,p.Fp); check_fe(F,x,&p); check_ov(F,x,&p);
-        fq_set_ui(fq_mat_entry(F,0,0),7,p.Fp); check_fe(F,x,&p); check_ov(F,x,&p);
+        for (int trial=0;trial<2;trial++) { example(F,x,&p,trial); check_fe(F,x,&p); check_ov(F,x,&p); check_pi3(F,x,&p); }
+        fq_mat_zero(F,p.Fp); check_fe(F,x,&p); check_ov(F,x,&p); check_pi3(F,x,&p);
+        fq_set_ui(fq_mat_entry(F,0,0),7,p.Fp); check_fe(F,x,&p); check_ov(F,x,&p); check_pi3(F,x,&p);
         fq_mat_clear(F,p.Fp); fq_mat_clear(x,p.Fp); pv_params_clear(&p);
     }
-    puts("FE/OV end-to-end, degree 1..10, threshold 1..3, tamper and malformed-key tests passed.");
+    puts("FE/OV/Pi3 end-to-end, degree 1..10, threshold 1..3, tamper and malformed-key tests passed.");
     return 0;
 }

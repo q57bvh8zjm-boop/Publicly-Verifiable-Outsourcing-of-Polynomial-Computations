@@ -2,7 +2,7 @@
 
 This research artifact implements three polynomial-outsourcing prototypes with a shared dense monomial order. The repaired implementation adds complete high-degree HSS evaluation, full-field randomness, public verification interfaces, end-to-end regression tests, and executable timing experiments.
 
-Start with [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md). The [revision notes](docs/REVISION_NOTES.md) map the changes to the review findings. The two-server construction uses an experimental Paillier HSS backend with explicit assumptions and bounds in [HSS_INSTANTIATION.md](docs/HSS_INSTANTIATION.md).
+For the paper's independent-VM experiments, start with [VM_EXPERIMENTS.md](docs/VM_EXPERIMENTS.md). It covers TCP deployment, Figures 2–5, the private Pi3 comparison, and the primitive microbenchmarks. [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md) describes the correctness tests. The two-server construction's assumptions and bounds are specified in [HSS_INSTANTIATION.md](docs/HSS_INSTANTIATION.md).
 
 ## Build and test
 
@@ -23,11 +23,23 @@ On macOS, install `flint`, `gmp`, and `libsodium` with Homebrew and run the same
 | $\Gamma_{\mathrm{FE}}^{\mathrm{Sh}}$ | `Gamma_FE_Sh` | `protocols/gamma_fe_sh.c` | Extension-field shares, encoded public verification key, client decoding |
 | $\Gamma_{\mathrm{OV}}^{\mathrm{Sh}}$ | `Gamma_OV_Sh` | `protocols/gamma_ov_sh.c` | Shamir shares over the full Ristretto scalar field, OV verification |
 | $\Gamma_{\mathrm{OV}}^{\mathrm{HSS}}$ | `Gamma_OV_HSS` | `protocols/gamma_ov_hss.c`, `lib/common/hss_paillier.c` | Two-server digit-decomposed Paillier HSS, all polynomial degrees, OV verification |
-| $\Pi_3$ | `Pi3` | `protocols/protocol2.c` | Historical baseline; polynomial evaluator regression only |
+| $\Pi_3$ | `Pi3` | `protocols/pi3.c` | Private extension-field query, server computation, verification, and decoding |
 
-Gamma_FE_Sh and Gamma_OV_Sh use `k=d*t+1` servers. Gamma_OV_HSS uses two servers and a threshold of one. The protocol APIs changed to separate public verification inputs from client secrets; the tests and benchmark are complete usage examples. Create public parameters with `pv_params_init` and clear every successful output with its matching cleanup function. Verification keys must come from the trusted query generator. These are in-process research APIs; they do not implement a network transport or wire-message parser.
+Gamma_FE_Sh, Gamma_OV_Sh, and Pi3 use `k=d*t+1` servers. Gamma_OV_HSS uses two servers and a threshold of one. Public verification inputs and client secrets have separate interfaces. Create parameters with `pv_params_init` and clear successful outputs with the matching cleanup functions. The TCP harness in `benchmarks/vm/` serializes each server's inputs and runs the complete protocol across independent processes.
 
-## Run measurements
+## Independent-VM measurements
+
+```sh
+make experiments
+python3 scripts/run_vm_experiments.py --config experiments/vms.json --profile smoke --trials 3 --output results/measured/vm-smoke
+python3 scripts/run_vm_experiments.py --config experiments/vms.json --profile paper --trials 30 --output results/measured/vm-paper
+python3 scripts/run_microbenchmarks.py --output results/measured/vm-micro
+python3 scripts/plot_vm_results.py results/measured/vm-paper --output results/plots/vm-paper
+```
+
+Copy `experiments/vms.example.json` to `experiments/vms.json`, set each server VM's address, and start its worker using the commands in the [VM guide](docs/VM_EXPERIMENTS.md). Every sample includes each server's computation time. The paper's `T_s` is their maximum; `T_c` is ProbGen + Verify + Decode. TCP wall times and setup are recorded separately. Figure 4 compares FE with Pi3; Figure 5 uses degrees 4, 8, and 10 with base-10 logarithms.
+
+## Local kernel measurements
 
 ```sh
 make benchmark
@@ -36,7 +48,7 @@ make benchmark
 python3 scripts/run_experiments.py --profile smoke --trials 3 --output results/measured/local-smoke
 ```
 
-The benchmark arguments are `SCHEME M D T TRIALS dense|var`, with `SCHEME` set to `Gamma_FE_Sh`, `Gamma_OV_Sh`, or `Gamma_OV_HSS`. Legacy numeric selectors `1`, `2`, and `3` remain accepted; new output always uses the canonical names. Every timing row is emitted only after successful verification and equality with native evaluation. The VAR workload computes the quadratic score of a one-lag vector autoregression forecast and also checks a direct matrix-vector reference. It measures this polynomial kernel; signatures, receipts, binding proofs, transport, and application preprocessing are outside the measurement.
+The benchmark arguments are `SCHEME M D T TRIALS dense|var`, with `SCHEME` set to `Gamma_FE_Sh`, `Gamma_OV_Sh`, or `Gamma_OV_HSS`. Legacy numeric selectors `1`, `2`, and `3` remain accepted; new output uses the canonical names. Every timing row follows successful verification and equality with native evaluation. The legacy `var` selector runs a vector-autoregression polynomial example; the manuscript's Verifiable Aggregate Receipts application has a separate implementation plan.
 
 The runner stores each command's CSV and stderr, a combined `raw.csv`, compiler/library information, source hashes, and machine metadata. Public workload fixtures are deterministic; cryptographic masks, scaling points, keys, and encryption coins use operating-system randomness. See [MEASUREMENTS.md](docs/MEASUREMENTS.md) for the timing definitions and the full-grid command.
 

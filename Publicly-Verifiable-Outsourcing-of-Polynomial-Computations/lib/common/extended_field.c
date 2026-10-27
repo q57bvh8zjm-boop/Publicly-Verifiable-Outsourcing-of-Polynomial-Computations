@@ -324,3 +324,63 @@ void ext_field_mat_entry_set(ext_field_mat_t *mat, slong i, slong j, const ext_f
     if (i < 0 || i >= mat->r || j < 0 || j >= mat->c) return;
     ext_field_elem_copy(&mat->rows[i][j], val);
 } 
+
+void ext_field_ctx_init_default(ext_field_ctx_t *field, const fmpz_t prime) {
+    fmpz_t c, minus_c;
+    fmpz_init(c); fmpz_init(minus_c); fmpz_one(c);
+    do {
+        fmpz_neg(minus_c, c);
+        if (fmpz_jacobi(minus_c, prime) == -1) break;
+        fmpz_add_ui(c, c, 1);
+    } while (1);
+    ext_field_ctx_init(field, prime, c);
+    fmpz_clear(c); fmpz_clear(minus_c);
+}
+
+/* Lagrange interpolation at 1,...,k; all basis coefficients are in F_q.
+ * Build the product once and use synthetic division: O(k^2) field operations.
+ */
+void ext_field_interpolate(ext_field_elem_t *coefficients, ext_field_elem_t *values,
+                        int k, const ext_field_ctx_t *field) {
+    fmpz_t *product = pv_alloc((size_t)k + 1, sizeof(fmpz_t));
+    fmpz_t *basis = pv_alloc((size_t)k, sizeof(fmpz_t));
+    for (int r = 0; r <= k; r++) fmpz_init(product[r]);
+    for (int r = 0; r < k; r++) { fmpz_init(basis[r]); ext_field_elem_zero(&coefficients[r]); }
+    fmpz_one(product[0]);
+    fmpz_t temp, denominator, weight;
+    fmpz_init(temp); fmpz_init(denominator); fmpz_init(weight);
+    for (int j = 1; j <= k; j++) {
+        for (int r = j; r > 0; r--) {
+            fmpz_mul_ui(temp, product[r], (ulong)j);
+            fmpz_sub(product[r], product[r-1], temp);
+            fmpz_mod(product[r], product[r], field->p);
+        }
+        fmpz_mul_si(product[0], product[0], -j);
+        fmpz_mod(product[0], product[0], field->p);
+    }
+    for (int j = 1; j <= k; j++) {
+        fmpz_one(basis[k-1]);
+        for (int r = k-2; r >= 0; r--) {
+            fmpz_mul_ui(temp, basis[r+1], (ulong)j);
+            fmpz_add(basis[r], product[r+1], temp);
+            fmpz_mod(basis[r], basis[r], field->p);
+        }
+        fmpz_one(denominator);
+        for (int i = 1; i <= k; i++) if (i != j)
+            fmpz_mul_si(denominator, denominator, j-i);
+        fmpz_mod(denominator, denominator, field->p);
+        if (!fmpz_invmod(denominator, denominator, field->p)) abort();
+        for (int r = 0; r < k; r++) {
+            fmpz_mul(weight, basis[r], denominator);
+            fmpz_mod(weight, weight, field->p);
+            fmpz_addmul(coefficients[r].a, values[j-1].a, weight);
+            fmpz_addmul(coefficients[r].b, values[j-1].b, weight);
+            fmpz_mod(coefficients[r].a, coefficients[r].a, field->p);
+            fmpz_mod(coefficients[r].b, coefficients[r].b, field->p);
+        }
+    }
+    for (int r = 0; r <= k; r++) fmpz_clear(product[r]);
+    for (int r = 0; r < k; r++) fmpz_clear(basis[r]);
+    free(product); free(basis);
+    fmpz_clear(temp); fmpz_clear(denominator); fmpz_clear(weight);
+}
