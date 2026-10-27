@@ -16,7 +16,7 @@ make test-hss
 make test-hss-high
 ```
 
-On macOS, install `flint`, `gmp`, and `libsodium` with Homebrew and run the same Make targets from this directory. `make check` runs the fast suite. The separate HSS suites generate fresh large keys and can take several minutes. CI runs all three commands.
+On macOS, install `flint`, `gmp`, and `libsodium` with Homebrew and run the same Make targets from this directory. `make check` runs the fast suite. The separate HSS suites generate fresh large keys and can take several minutes.
 
 | Construction | Source | Current scope |
 |---|---|---|
