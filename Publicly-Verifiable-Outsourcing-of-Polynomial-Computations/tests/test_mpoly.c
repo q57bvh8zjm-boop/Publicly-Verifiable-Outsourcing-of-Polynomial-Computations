@@ -3,7 +3,7 @@
 
 #include "../lib/common/mpoly.h"
 #include "../lib/common/extended_field.h"
-#include "../protocols/scheme1.h"
+#include "../protocols/gamma_fe_sh.h"
 #include "../protocols/protocol2.h"
 
 static void fail(const char *message) {
@@ -90,7 +90,7 @@ static void test_extension_field_eval(void) {
 
     ext_field_elem_t result;
     ext_field_elem_init(&result);
-    scheme1_eval_extended(&result, F, &X, &ext_ctx, &par);
+    gamma_fe_sh_eval_extended(&result, F, &X, &ext_ctx, &par);
     if (fmpz_cmp_ui(result.a, 92) != 0 || !fmpz_is_zero(result.b))
         fail("extension-field degree-3 evaluation returned the wrong value");
 

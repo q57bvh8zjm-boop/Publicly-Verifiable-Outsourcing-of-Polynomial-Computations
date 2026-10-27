@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "scheme1.h"
-#include "scheme2.h"
-#include "scheme3.h"
+#include "gamma_fe_sh.h"
+#include "gamma_ov_sh.h"
+#include "gamma_ov_hss.h"
 
 static void example(fq_mat_t F, fq_mat_t x, pubpar *p, int random) {
     for (slong i=0; i<fq_mat_nrows(F,p->Fp); i++) {
@@ -16,88 +16,88 @@ static void example(fq_mat_t F, fq_mat_t x, pubpar *p, int random) {
     }
 }
 static void check_fe(fq_mat_t F, fq_mat_t x, pubpar *p) {
-    scheme1_probgen_out req;
-    assert(scheme1_probgen(&req,x,p));
+    gamma_fe_sh_probgen_out req;
+    assert(gamma_fe_sh_probgen(&req,x,p));
     ext_field_elem_t *r=pv_alloc(p->k,sizeof(*r));
     for (int i=0;i<p->k;i++) {
         ext_field_elem_init(&r[i]);
-        scheme1_compute(&r[i],F,&req.shares[i],&req.masks[i],&req.vk.field,p);
+        gamma_fe_sh_compute(&r[i],F,&req.shares[i],&req.masks[i],&req.vk.field,p);
     }
-    scheme1_verify_out verified;
-    assert(scheme1_verify(&verified,&req.vk,r,p));
+    gamma_fe_sh_verify_out verified;
+    assert(gamma_fe_sh_verify(&verified,&req.vk,r,p));
     fq_t actual, expected;
     fq_init(actual,p->Fp); Eval(expected,F,x,p);
-    assert(scheme1_decode(actual,&req,&verified,p));
+    assert(gamma_fe_sh_decode(actual,&req,&verified,p));
     assert(fq_equal(actual,expected,p->Fp));
-    scheme1_verify_out_clear(&verified,p);
+    gamma_fe_sh_verify_out_clear(&verified,p);
     /* Imaginary constant changes fail public verification deterministically. */
     for (int i=0;i<p->k;i++) {
         fmpz_add_ui(r[i].b,r[i].b,1); fmpz_mod(r[i].b,r[i].b,p->p);
     }
-    assert(!scheme1_verify(&verified,&req.vk,r,p));
-    assert(!scheme1_decode(actual,&req,&verified,p));
-    scheme1_verify_out_clear(&verified,p);
+    assert(!gamma_fe_sh_verify(&verified,&req.vk,r,p));
+    assert(!gamma_fe_sh_decode(actual,&req,&verified,p));
+    gamma_fe_sh_verify_out_clear(&verified,p);
     for (int i=0;i<p->k;i++) {
         fmpz_sub_ui(r[i].b,r[i].b,1); fmpz_mod(r[i].b,r[i].b,p->p);
     }
     memset(req.vk.n[0],0xff,32);
-    assert(!scheme1_verify(&verified,&req.vk,r,p));
-    scheme1_verify_out_clear(&verified,p);
+    assert(!gamma_fe_sh_verify(&verified,&req.vk,r,p));
+    gamma_fe_sh_verify_out_clear(&verified,p);
     for (int i=0;i<p->k;i++) ext_field_elem_clear(&r[i]);
     free(r); fq_clear(actual,p->Fp); fq_clear(expected,p->Fp);
-    scheme1_probgen_out_clear(&req,p);
+    gamma_fe_sh_probgen_out_clear(&req,p);
 }
 static void check_ov(fq_mat_t F, fq_mat_t x, pubpar *p) {
-    scheme2_probgen_out req, next;
-    assert(scheme2_probgen(&req,x,p)); assert(scheme2_probgen(&next,x,p));
+    gamma_ov_sh_probgen_out req, next;
+    assert(gamma_ov_sh_probgen(&req,x,p)); assert(gamma_ov_sh_probgen(&next,x,p));
     assert(!fq_mat_equal(req.sigma[0][0],next.sigma[0][0],p->Fp));
-    scheme2_probgen_out_clear(&next,p);
-    scheme2_compute_out *r=pv_alloc(p->k,sizeof(*r));
-    for (int i=0;i<p->k;i++) scheme2_compute(&r[i],i,F,req.sigma[i],p);
-    scheme2_verify_out v; scheme2_reconstruct_out decoded;
-    assert(scheme2_verify(&v,req.vk_x,r,p));
-    scheme2_reconstruct(&decoded,v.aux_R_prime,fq_mat_entry(F,0,0),p);
+    gamma_ov_sh_probgen_out_clear(&next,p);
+    gamma_ov_sh_compute_out *r=pv_alloc(p->k,sizeof(*r));
+    for (int i=0;i<p->k;i++) gamma_ov_sh_compute(&r[i],i,F,req.sigma[i],p);
+    gamma_ov_sh_verify_out v; gamma_ov_sh_reconstruct_out decoded;
+    assert(gamma_ov_sh_verify(&v,req.vk_x,r,p));
+    gamma_ov_sh_reconstruct(&decoded,v.aux_R_prime,fq_mat_entry(F,0,0),p);
     fq_t expected, one; Eval(expected,F,x,p); fq_init(one,p->Fp); fq_one(one,p->Fp);
     assert(fq_equal(fq_mat_entry(decoded.result,0,0),expected,p->Fp));
-    scheme2_verify_out_clear(&v,p); scheme2_reconstruct_out_clear(&decoded,p);
+    gamma_ov_sh_verify_out_clear(&v,p); gamma_ov_sh_reconstruct_out_clear(&decoded,p);
     fq_add(fq_mat_entry(r[0].pi[0],0,0),fq_mat_entry(r[0].pi[0],0,0),one,p->Fp);
-    assert(!scheme2_verify(&v,req.vk_x,r,p)); scheme2_verify_out_clear(&v,p);
+    assert(!gamma_ov_sh_verify(&v,req.vk_x,r,p)); gamma_ov_sh_verify_out_clear(&v,p);
     fq_sub(fq_mat_entry(r[0].pi[0],0,0),fq_mat_entry(r[0].pi[0],0,0),one,p->Fp);
     memset(req.vk_x[0],0xff,32);
-    assert(!scheme2_verify(&v,req.vk_x,r,p)); scheme2_verify_out_clear(&v,p);
-    for (int i=0;i<p->k;i++) scheme2_compute_out_clear(&r[i],p);
-    free(r); scheme2_probgen_out_clear(&req,p); fq_clear(expected,p->Fp); fq_clear(one,p->Fp);
+    assert(!gamma_ov_sh_verify(&v,req.vk_x,r,p)); gamma_ov_sh_verify_out_clear(&v,p);
+    for (int i=0;i<p->k;i++) gamma_ov_sh_compute_out_clear(&r[i],p);
+    free(r); gamma_ov_sh_probgen_out_clear(&req,p); fq_clear(expected,p->Fp); fq_clear(one,p->Fp);
 }
-static void check_hss(fq_mat_t F, fq_mat_t x, pubpar *p, scheme3_keygen_out *key) {
-    scheme3_probgen_out req;
-    assert(scheme3_probgen(&req,&key->pk,x,p));
-    scheme3_compute_out r[2], repeat;
-    for (int b=0;b<2;b++) assert(scheme3_compute(&r[b],b,&key->ek[b],&key->pk,F,req.ct_inputs,p));
-    assert(scheme3_compute(&repeat,0,&key->ek[0],&key->pk,F,req.ct_inputs,p));
+static void check_hss(fq_mat_t F, fq_mat_t x, pubpar *p, gamma_ov_hss_keygen_out *key) {
+    gamma_ov_hss_probgen_out req;
+    assert(gamma_ov_hss_probgen(&req,&key->pk,x,p));
+    gamma_ov_hss_compute_out r[2], repeat;
+    for (int b=0;b<2;b++) assert(gamma_ov_hss_compute(&r[b],b,&key->ek[b],&key->pk,F,req.ct_inputs,p));
+    assert(gamma_ov_hss_compute(&repeat,0,&key->ek[0],&key->pk,F,req.ct_inputs,p));
     for (int j=0;j<=p->d;j++) assert(fq_equal(r[0].values[j],repeat.values[j],p->Fp));
-    scheme3_compute_out_clear(&repeat,p);
-    scheme3_verify_out v; scheme3_reconstruct_out decoded;
-    assert(scheme3_verify(&v,req.vk_x,r,p));
-    scheme3_reconstruct(&decoded,v.aux_R_prime,fq_mat_entry(F,0,0),p);
+    gamma_ov_hss_compute_out_clear(&repeat,p);
+    gamma_ov_hss_verify_out v; gamma_ov_hss_reconstruct_out decoded;
+    assert(gamma_ov_hss_verify(&v,req.vk_x,r,p));
+    gamma_ov_hss_reconstruct(&decoded,v.aux_R_prime,fq_mat_entry(F,0,0),p);
     fq_t expected,one; Eval(expected,F,x,p); fq_init(one,p->Fp); fq_one(one,p->Fp);
     assert(fq_equal(fq_mat_entry(decoded.result,0,0),expected,p->Fp));
-    scheme3_verify_out_clear(&v,p); scheme3_reconstruct_out_clear(&decoded,p);
+    gamma_ov_hss_verify_out_clear(&v,p); gamma_ov_hss_reconstruct_out_clear(&decoded,p);
     fq_add(r[0].values[0],r[0].values[0],one,p->Fp);
-    assert(!scheme3_verify(&v,req.vk_x,r,p)); scheme3_verify_out_clear(&v,p);
+    assert(!gamma_ov_hss_verify(&v,req.vk_x,r,p)); gamma_ov_hss_verify_out_clear(&v,p);
     fq_sub(r[0].values[0],r[0].values[0],one,p->Fp);
     memset(req.vk_x[0],0xff,32);
-    assert(!scheme3_verify(&v,req.vk_x,r,p)); scheme3_verify_out_clear(&v,p);
+    assert(!gamma_ov_hss_verify(&v,req.vk_x,r,p)); gamma_ov_hss_verify_out_clear(&v,p);
     fmpz_zero(req.ct_inputs[0].c[0]);
-    assert(!scheme3_compute(&repeat,0,&key->ek[0],&key->pk,F,req.ct_inputs,p));
-    scheme3_compute_out_clear(&repeat,p);
+    assert(!gamma_ov_hss_compute(&repeat,0,&key->ek[0],&key->pk,F,req.ct_inputs,p));
+    gamma_ov_hss_compute_out_clear(&repeat,p);
     fq_clear(expected,p->Fp); fq_clear(one,p->Fp);
-    for (int b=0;b<2;b++) scheme3_compute_out_clear(&r[b],p);
-    scheme3_probgen_out_clear(&req,p);
+    for (int b=0;b<2;b++) gamma_ov_hss_compute_out_clear(&r[b],p);
+    gamma_ov_hss_probgen_out_clear(&req,p);
 }
 static void hss_tests(void) {
     pubpar p; assert(pv_params_init(&p,2,3,1));
     puts("Generating fresh >=3072-bit HSS key..."); fflush(stdout);
-    scheme3_keygen_out key; assert(scheme3_keygen(&key,&p));
+    gamma_ov_hss_keygen_out key; assert(gamma_ov_hss_keygen(&key,&p));
     fq_mat_t F,x;
     fq_mat_init(F,10,1,p.Fp); fq_mat_init(x,2,1,p.Fp);
     fq_set_ui(fq_mat_entry(F,3,0),1,p.Fp); /* x0^2 */
@@ -110,12 +110,12 @@ static void hss_tests(void) {
     fq_mat_zero(F,p.Fp); check_hss(F,x,&p,&key);
     fq_set_ui(fq_mat_entry(F,0,0),7,p.Fp); check_hss(F,x,&p,&key);
     fq_mat_clear(F,p.Fp); fq_mat_clear(x,p.Fp);
-    scheme3_keygen_out_clear(&key); pv_params_clear(&p);
+    gamma_ov_hss_keygen_out_clear(&key); pv_params_clear(&p);
 }
 static void high_degree_hss(void) {
     pubpar p; assert(pv_params_init(&p,1,10,1));
     puts("Generating range-sized degree-10 HSS key..."); fflush(stdout);
-    scheme3_keygen_out key; assert(scheme3_keygen(&key,&p));
+    gamma_ov_hss_keygen_out key; assert(gamma_ov_hss_keygen(&key,&p));
     fq_mat_t F,x; fq_mat_init(F,11,1,p.Fp); fq_mat_init(x,1,1,p.Fp);
     fq_t expected,a,b,total; fq_init(a,p.Fp); fq_init(b,p.Fp); fq_init(total,p.Fp);
     fq_set_si(fq_mat_entry(x,0,0),-1,p.Fp);
@@ -131,7 +131,7 @@ static void high_degree_hss(void) {
     }
     hss_ciphertext_clear(&ct); fq_clear(a,p.Fp); fq_clear(b,p.Fp); fq_clear(total,p.Fp);
     fq_mat_clear(F,p.Fp); fq_mat_clear(x,p.Fp);
-    scheme3_keygen_out_clear(&key); pv_params_clear(&p);
+    gamma_ov_hss_keygen_out_clear(&key); pv_params_clear(&p);
 }
 int main(int argc, char **argv) {
     if (argc>1 && !strcmp(argv[1],"--hss")) { hss_tests(); return 0; }
