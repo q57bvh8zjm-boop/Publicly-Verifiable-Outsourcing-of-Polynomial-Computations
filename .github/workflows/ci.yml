@@ -1,0 +1,16 @@
+name: Artifact checks
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: Publicly-Verifiable-Outsourcing-of-Polynomial-Computations
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y build-essential libflint-dev libgmp-dev libsodium-dev python3
+      - run: make check
+      - run: make test-hss
+      - run: make test-hss-high
+      - run: ./build/benchmark 2 4 2 1 2 var
