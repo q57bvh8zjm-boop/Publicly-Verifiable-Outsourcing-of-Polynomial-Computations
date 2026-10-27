@@ -18,13 +18,18 @@ OUT = ROOT / "results" / "plots"
 OUT.mkdir(parents=True, exist_ok=True)
 def read_csv(name):
     with (DATA / name).open(newline="") as f: return list(csv.DictReader(f))
+SCHEME_LABELS = {
+    "Gamma1": r"$\Gamma_{\mathrm{FE}}^{\mathrm{Sh}}$",
+    "Gamma2": r"$\Gamma_{\mathrm{OV}}^{\mathrm{Sh}}$",
+    "Gamma3": r"$\Gamma_{\mathrm{OV}}^{\mathrm{HSS}}$",
+}
 def plot_groups(rows, group_keys, xkey, ykey, xlabel, ylabel, outname, title):
     fig, ax = plt.subplots()
     groups = {}
     for r in rows: groups.setdefault(tuple(r[k] for k in group_keys), []).append(r)
     for key, vals in groups.items():
         vals.sort(key=lambda r: float(r[xkey]))
-        label = ", ".join(f"{k}={v}" for k, v in zip(group_keys, key))
+        label = ", ".join(SCHEME_LABELS.get(v, v) if k == "scheme" else f"{k}={v}" for k, v in zip(group_keys, key))
         ax.plot([float(v[xkey]) for v in vals], [float(v[ykey]) for v in vals], marker="o", label=label)
     ax.set_xlabel(xlabel); ax.set_ylabel(ylabel); ax.set_title(title + "\nARCHIVED — not repaired-code measurements"); ax.legend(); fig.tight_layout(); fig.savefig(OUT / outname, dpi=200); plt.close(fig)
 plot_groups(read_csv("figure2_low_degree.csv"), ["scheme"], "m", "log2_Rt_star", "m", "log2(Rt*)", "figure2_low_degree.png", "Figure 2 reported data")
@@ -32,5 +37,5 @@ plot_groups(read_csv("figure3_thresholds.csv"), ["scheme","t"], "m", "log2_Rt_st
 rows4 = read_csv("figure4_high_degree.csv")
 for d in sorted({r["d"] for r in rows4}, key=int):
     plot_groups([r for r in rows4 if r["d"] == d], ["scheme"], "m", "log2_Rt_star", "m", "log2(Rt*)", f"figure4_d{d}.png", f"Figure 4 reported data, d={d}")
-plot_groups(read_csv("figure5_gamma1_vs_pi3.csv"), ["d","t"], "m", "Tc_Gamma1_over_Tc_Pi3", "m", "Tc(Gamma1)/Tc(Pi3)", "figure5_gamma1_vs_pi3.png", "Figure 5 reported data")
+plot_groups(read_csv("figure5_gamma1_vs_pi3.csv"), ["d","t"], "m", "Tc_Gamma1_over_Tc_Pi3", "m", r"$T_c(\Gamma_{\mathrm{FE}}^{\mathrm{Sh}})/T_c(\Pi_3)$", "figure5_gamma_fe_sh_vs_pi3.png", "Figure 5 reported data")
 print(f"Wrote plots to {OUT}")

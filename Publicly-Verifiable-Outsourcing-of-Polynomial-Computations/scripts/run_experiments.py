@@ -11,6 +11,12 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SCHEMES = ('Gamma_FE_Sh', 'Gamma_OV_Sh', 'Gamma_OV_HSS')
+LEGACY_SCHEMES = dict(zip(('1', '2', '3'), SCHEMES))
+
+def scheme_name(value):
+    return LEGACY_SCHEMES.get(value, value)
+
 
 def output(*args):
     p = subprocess.run(args, cwd=ROOT, text=True, capture_output=True)
@@ -26,7 +32,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile', choices=('smoke', 'paper'), default='smoke')
     parser.add_argument('--trials', type=int, default=3)
-    parser.add_argument('--schemes', nargs='+', type=int, choices=(1, 2, 3), default=[1, 2, 3])
+    parser.add_argument('--schemes', nargs='+', type=scheme_name, choices=SCHEMES, default=list(SCHEMES))
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     if args.trials < 1:
@@ -39,13 +45,13 @@ def main():
         for scheme in args.schemes:
             runs.extend([(scheme, 2, 2, 1, 'dense'), (scheme, 2, 2, 1, 'var')])
         for scheme in args.schemes:
-            if scheme != 3:
+            if scheme != 'Gamma_OV_HSS':
                 runs.extend((scheme, 2, d, 1, 'dense') for d in (4, 8, 10))
     else:
         for scheme in args.schemes:
             runs.extend((scheme, m, 2, 1, 'dense') for m in range(200, 2001, 200))
             runs.extend((scheme, m, d, 1, 'dense') for d in (4, 8, 10) for m in range(1, 16))
-            if scheme != 3:
+            if scheme != 'Gamma_OV_HSS':
                 runs.extend((scheme, m, 2, t, 'dense') for t in (2, 3) for m in range(200, 2001, 200))
     metadata = {'started_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 'platform': platform.platform(), 'machine': platform.machine(),
