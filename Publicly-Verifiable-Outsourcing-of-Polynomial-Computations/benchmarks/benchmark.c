@@ -39,46 +39,16 @@ static int parse_scheme(const char *name) {
 static void ensure(int valid) {
     if(!valid) { fputs("Correctness check failed; timing row discarded.\n",stderr); exit(1); }
 }
-/* A one-lag VAR forecast y=A*x, measured as the quadratic score sum(y_i^2).
- * A_ij = 1 + ((i+1)*(j+1) mod 7). Model expansion is offline.
- */
-static void var_polynomial(fq_mat_t F, pubpar *p) {
-    fq_mat_zero(F,p->Fp); slong index=1+p->m;
-    fmpz_t coefficient,term; fmpz_init(coefficient); fmpz_init(term);
-    for(int j=0;j<p->m;j++) for(int k=j;k<p->m;k++) {
-        fmpz_zero(coefficient);
-        for(int i=0;i<p->m;i++) {
-            ulong a=1+((ulong)(i+1)*(j+1))%7, b=1+((ulong)(i+1)*(k+1))%7;
-            fmpz_set_ui(term,a*b*(j==k?1:2)); fmpz_add(coefficient,coefficient,term);
-        }
-        fq_set_fmpz(fq_mat_entry(F,index++,0),coefficient,p->Fp);
-    }
-    fmpz_clear(coefficient); fmpz_clear(term);
-}
-static void check_var_reference(fq_t expected,fq_mat_t x,pubpar *p) {
-    fq_t y,term,sum; fq_init(y,p->Fp); fq_init(term,p->Fp); fq_init(sum,p->Fp);
-    for(int i=0;i<p->m;i++) {
-        fq_zero(y,p->Fp);
-        for(int j=0;j<p->m;j++) {
-            fq_set_ui(term,1+((ulong)(i+1)*(j+1))%7,p->Fp);
-            fq_mul(term,term,fq_mat_entry(x,j,0),p->Fp); fq_add(y,y,term,p->Fp);
-        }
-        fq_mul(y,y,y,p->Fp); fq_add(sum,sum,y,p->Fp);
-    }
-    ensure(fq_equal(sum,expected,p->Fp)); fq_clear(y,p->Fp); fq_clear(term,p->Fp); fq_clear(sum,p->Fp);
-}
 int main(int argc,char **argv) {
     if(argc!=7) {
-        fprintf(stderr,"Usage: %s SCHEME(Gamma_FE_Sh|Gamma_OV_Sh|Gamma_OV_HSS) M D T TRIALS dense|var\n",argv[0]); return 2;
+        fprintf(stderr,"Usage: %s SCHEME(Gamma_FE_Sh|Gamma_OV_Sh|Gamma_OV_HSS) M D T TRIALS dense\n",argv[0]); return 2;
     }
     int scheme=parse_scheme(argv[1]),m=number(argv[2]),d=number(argv[3]),t=number(argv[4]),trials=number(argv[5]);
-    int is_var=!strcmp(argv[6],"var");
-    if(scheme>3 || (scheme==3 && t!=1) || (is_var && d!=2) || (!is_var && strcmp(argv[6],"dense"))) return 2;
+    if(scheme>3 || (scheme==3 && t!=1) || strcmp(argv[6],"dense")) return 2;
     pubpar p; ensure(pv_params_init(&p,m,d,t));
     slong count=mpoly_num_coefficients(m,d); ensure(count>0);
     fq_mat_t F,x; fq_mat_init(F,count,1,p.Fp); fq_mat_init(x,m,1,p.Fp);
     for(slong i=0;i<count;i++) fixture(fq_mat_entry(F,i,0),"coefficient",m,d,i,0,&p);
-    if(is_var) var_polynomial(F,&p);
     gamma_ov_hss_keygen_out key; double begin=now_ms(),keygen_ms=0;
     if(scheme==3) { ensure(gamma_ov_hss_keygen(&key,&p)); keygen_ms=now_ms()-begin; }
     fprintf(stderr,"FLINT=%s GMP=%s sodium=%s scheme=%s m=%d d=%d t=%d\n",FLINT_VERSION,gmp_version,sodium_version_string(),scheme_names[scheme],m,d,t);
@@ -87,7 +57,6 @@ int main(int argc,char **argv) {
     for(int trial=0;trial<trials;trial++) {
         for(int i=0;i<m;i++) fixture(fq_mat_entry(x,i,0),"input",m,d,i,trial,&p);
         fq_t expected; Eval(expected,F,x,&p);
-        if(is_var) check_var_reference(expected,x,&p);
         begin=now_ms();
         for(int i=0;i<100;i++) { fq_t temp; Eval(temp,F,x,&p); fq_clear(temp,p.Fp); }
         double native=(now_ms()-begin)/100.0,pg,server,verify,decode;
