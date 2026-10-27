@@ -32,11 +32,10 @@ Gamma_FE_Sh and Gamma_OV_Sh use `k=d*t+1` servers. Gamma_OV_HSS uses two servers
 ```sh
 make benchmark
 ./build/benchmark Gamma_OV_Sh 200 2 1 10 dense
-./build/benchmark Gamma_OV_Sh 4 2 1 10 var
 python3 scripts/run_experiments.py --profile smoke --trials 3 --output results/measured/local-smoke
 ```
 
-The benchmark arguments are `SCHEME M D T TRIALS dense|var`, with `SCHEME` set to `Gamma_FE_Sh`, `Gamma_OV_Sh`, or `Gamma_OV_HSS`. Legacy numeric selectors `1`, `2`, and `3` remain accepted; new output always uses the canonical names. Every timing row is emitted only after successful verification and equality with native evaluation. The VAR workload computes the quadratic score of a one-lag vector autoregression forecast and also checks a direct matrix-vector reference. It measures this polynomial kernel; signatures, receipts, binding proofs, transport, and application preprocessing are outside the measurement.
+The benchmark arguments are `SCHEME M D T TRIALS dense`, with `SCHEME` set to `Gamma_FE_Sh`, `Gamma_OV_Sh`, or `Gamma_OV_HSS`. Legacy numeric selectors `1`, `2`, and `3` remain accepted; new output always uses the canonical names. Every timing row is emitted only after successful verification and equality with native evaluation.
 
 The runner stores each command's CSV and stderr, a combined `raw.csv`, compiler/library information, source hashes, and machine metadata. Public workload fixtures are deterministic; cryptographic masks, scaling points, keys, and encryption coins use operating-system randomness. See [MEASUREMENTS.md](docs/MEASUREMENTS.md) for the timing definitions and the full-grid command.
 
@@ -45,10 +44,6 @@ The runner stores each command's CSV and stderr, a combined `raw.csv`, compiler/
 FE denotes field extensions, OV orthogonal vectors, Sh Shamir sharing, and HSS homomorphic secret sharing. The former Gamma1, Gamma2, and Gamma3 names map to `Gamma_FE_Sh`, `Gamma_OV_Sh`, and `Gamma_OV_HSS`, respectively. Source files and C API prefixes are `gamma_fe_sh`, `gamma_ov_sh`, and `gamma_ov_hss`. Include the corresponding header and use that prefix when updating code written against the former `scheme1`, `scheme2`, or `scheme3` APIs.
 
 Existing raw CSVs, execution logs, commands, and source hashes retain their original labels as recorded. Plotting translates those labels to the manuscript notation.
-
-## Historical data
-
-`results/reported/` contains archived coordinates transcribed from an earlier paper version. They are not measurements of the repaired implementation. Their provenance and known disagreement with the supplied manuscript are recorded in that directory. `make reported-plots` redraws them with an archival label. Use `results/measured/` for current runs.
 
 ## Polynomial representation
 
