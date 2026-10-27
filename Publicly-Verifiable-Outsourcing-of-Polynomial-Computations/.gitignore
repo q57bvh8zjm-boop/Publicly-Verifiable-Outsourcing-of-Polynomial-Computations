@@ -3,3 +3,5 @@
 /results/measured/local*/
 __pycache__/
 *.pyc
+/.deps/
+/experiments/vms.json
