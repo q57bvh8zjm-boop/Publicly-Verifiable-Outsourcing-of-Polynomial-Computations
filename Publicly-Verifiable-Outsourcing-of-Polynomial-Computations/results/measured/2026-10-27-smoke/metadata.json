@@ -1,0 +1,147 @@
+{
+  "started_utc": "2026-10-27T04:14:06.909597+00:00",
+  "platform": "macOS-15.6.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "processor": "arm",
+  "cpu_count": 10,
+  "compiler": "Apple clang version 15.0.0 (clang-1500.0.40.1)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin",
+  "revision": "6f1a5c7884fd0a8f9ca68774d00c876cc66d423c",
+  "working_tree": "M Makefile\n M README.md\n D \"REVIEWER_GUIDE\\357\\274\\210Quick Start\\357\\274\\211.md\"\n M lib/common/README_extended_field.md\n M lib/common/extended_field.c\n M lib/common/extended_field.h\n M lib/common/mpoly.c\n M lib/common/mpoly.h\n D protocols/protocol2_pir_optimize.c\n M protocols/scheme1.c\n M protocols/scheme1.h\n M protocols/scheme2.c\n M protocols/scheme2.h\n M protocols/scheme3.c\n M protocols/scheme3.h\n D protocols/scheme3_pir_optimize.c\n M results/reported/README.md\n M scripts/plot_reported_results.py\n M scripts/validate_artifact.py\n?? ../.github/\n?? .gitignore\n?? REVIEWER_GUIDE.md\n?? benchmarks/\n?? docs/\n?? lib/common/crypto_util.c\n?? lib/common/crypto_util.h\n?? lib/common/hss_paillier.c\n?? lib/common/hss_paillier.h\n?? scripts/run_experiments.py\n?? tests/test_protocols.c",
+  "source_sha256": {
+    "Makefile": "74724298867da686d86706cb6c5dc9aab6165bd1789856e32ffbf38a391e08b5",
+    "benchmarks/benchmark.c": "be84d4565748a7f99b722b7d6171602dc1e7390187e1038c1729a25d512341e2",
+    "lib/common/crypto_util.c": "89484a05ae58900c66f816d34084ff47d1022ab552c1c29b0d921794b1b23a19",
+    "lib/common/crypto_util.h": "05d1356c410b1479f01fc167f6520e85d558d2ce361a2a7e1844739f620122d7",
+    "lib/common/extended_field.c": "b132f7a83a99c2d8c42da328576fa5a21720786e32a233725b06276108747a87",
+    "lib/common/extended_field.h": "1fc8b63f5a6ab7e60322e39940cb48a7d5872f203af083a6541c0a7499ddbabd",
+    "lib/common/hss_paillier.c": "225cab50da05b72d99d894beca0dddd198f12ad7bfdbe5186bce0419aae2c91c",
+    "lib/common/hss_paillier.h": "43b5da10d5604895f63e44465fd164fce3051a0c5204ab582480a27ade4f0350",
+    "lib/common/mpoly.c": "39576692db54b0d568f597f03bd5246e6a352187e0c87d9aafc5ca48c15389c6",
+    "lib/common/mpoly.h": "551d4dedec1ee9befc49e2ce4b755141c7629552d85681199d2f131c4e4e8756",
+    "protocols/protocol2.c": "1d08096acef6bb9c77de9a5e423af181c46e5ba51cc8f1947a660ee1efbada7a",
+    "protocols/protocol2.h": "3ff048b5e83ab47c130f9add03458b37178f355f430b7d7a1274b994c7001c97",
+    "protocols/scheme1.c": "b1d1a1f9ddcf1fa9753fdb6e6e36e4362be25daf8063ddf717e59cf53058d995",
+    "protocols/scheme1.h": "3390f4f4d8809ec097bad77b7ba371f7ad49fffd819c170b36b8ff246feccdb6",
+    "protocols/scheme2.c": "efd37a719db0f6a3993468ecb1edcc0f169fdeb1e5435eb8819453948b713d14",
+    "protocols/scheme2.h": "16e48550d3b254a7941b9c32533f35b5b6f24cacf30df932e92be4c89839892a",
+    "protocols/scheme3.c": "22082e898f3944ceb317cf31635f1642dbb0210331c9eefc5e1697c44ec2ea98",
+    "protocols/scheme3.h": "ff2050a1b00f891a8c76d1c6a51e0e093c72ac96d96aed2fa2d10c5c87046dbc",
+    "scripts/plot_reported_results.py": "81e130d3a3807e3b82d16fec15e973cfd7adf42b9c83a1d61c9f635d10de8054",
+    "scripts/run_experiments.py": "ec394717025fb2a57113f2a4e04189f44229887d82627ea18e74ef25d2bdb095",
+    "scripts/validate_artifact.py": "1ca206d00fedc02839789b0a732026a27b4c67c1aa115d8d4d6ce511c7ac2585"
+  },
+  "profile": "smoke",
+  "trials": 3,
+  "commands": [
+    [
+      "./build/benchmark",
+      "1",
+      "2",
+      "2",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "1",
+      "2",
+      "2",
+      "1",
+      "3",
+      "var"
+    ],
+    [
+      "./build/benchmark",
+      "2",
+      "2",
+      "2",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "2",
+      "2",
+      "2",
+      "1",
+      "3",
+      "var"
+    ],
+    [
+      "./build/benchmark",
+      "3",
+      "2",
+      "2",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "3",
+      "2",
+      "2",
+      "1",
+      "3",
+      "var"
+    ],
+    [
+      "./build/benchmark",
+      "1",
+      "2",
+      "4",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "1",
+      "2",
+      "8",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "1",
+      "2",
+      "10",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "2",
+      "2",
+      "4",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "2",
+      "2",
+      "8",
+      "1",
+      "3",
+      "dense"
+    ],
+    [
+      "./build/benchmark",
+      "2",
+      "2",
+      "10",
+      "1",
+      "3",
+      "dense"
+    ]
+  ],
+  "status": "complete",
+  "finished_utc": "2026-10-27T04:16:08.787003+00:00"
+}

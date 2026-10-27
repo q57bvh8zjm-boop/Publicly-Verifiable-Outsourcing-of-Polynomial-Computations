@@ -26,7 +26,7 @@ def plot_groups(rows, group_keys, xkey, ykey, xlabel, ylabel, outname, title):
         vals.sort(key=lambda r: float(r[xkey]))
         label = ", ".join(f"{k}={v}" for k, v in zip(group_keys, key))
         ax.plot([float(v[xkey]) for v in vals], [float(v[ykey]) for v in vals], marker="o", label=label)
-    ax.set_xlabel(xlabel); ax.set_ylabel(ylabel); ax.set_title(title); ax.legend(); fig.tight_layout(); fig.savefig(OUT / outname, dpi=200); plt.close(fig)
+    ax.set_xlabel(xlabel); ax.set_ylabel(ylabel); ax.set_title(title + "\nARCHIVED — not repaired-code measurements"); ax.legend(); fig.tight_layout(); fig.savefig(OUT / outname, dpi=200); plt.close(fig)
 plot_groups(read_csv("figure2_low_degree.csv"), ["scheme"], "m", "log2_Rt_star", "m", "log2(Rt*)", "figure2_low_degree.png", "Figure 2 reported data")
 plot_groups(read_csv("figure3_thresholds.csv"), ["scheme","t"], "m", "log2_Rt_star", "m", "log2(Rt*)", "figure3_thresholds.png", "Figure 3 reported data")
 rows4 = read_csv("figure4_high_degree.csv")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate reported-data grids and repository source hygiene."""
+"""Validate archived CSV shapes and source hygiene, not experimental correctness."""
 
 from __future__ import annotations
 
@@ -89,7 +89,7 @@ def main() -> int:
     except (AssertionError, KeyError, OSError) as error:
         print(f"Artifact validation failed: {error}", file=sys.stderr)
         return 1
-    print("Artifact data grids and source-comment checks passed.")
+    print("Archived CSV grid and source-comment checks passed (no performance validation).")
     return 0
 
 

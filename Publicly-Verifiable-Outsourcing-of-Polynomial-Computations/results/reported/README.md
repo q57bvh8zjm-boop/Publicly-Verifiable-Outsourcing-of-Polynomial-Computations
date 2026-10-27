@@ -1,14 +1,9 @@
-# Experimental result data
+# Archived reported coordinates
 
-- `figure2_low_degree.csv` -- Figure 2 / `fig:Output1`
-- `figure3_thresholds.csv` -- Figure 3 / `fig:Rt`
-- `figure4_high_degree.csv` -- Figure 4 / `fig:bigd`
-- `figure5_gamma1_vs_pi3.csv` -- Figure 5 / `fig:tc_gamma1_pi3`
-- `table_microbenchmark.csv` -- Table `tab:micro`
-- `table_var.csv` -- Table `VAR`
+These CSVs were inherited from the earlier repository version and transcribed from paper plots/tables. They are preserved for historical comparison. They are not raw timing logs and do not measure the repaired implementation.
 
-Run the following command from the repository root to generate the plot images:
+Files: `figure2_low_degree.csv`, `figure3_thresholds.csv`, `figure4_high_degree.csv`, `figure5_gamma1_vs_pi3.csv`, `table_microbenchmark.csv`, and `table_var.csv`.
 
-```bash
-make reported-plots
-```
+Known mismatch: the archived Gamma3 `d=4,m=14` point in Figure 4 has a negative `log2_Rt_star`, whereas the supplied manuscript says it remains slower than native evaluation for `m<=15`. The original hardware runs and provenance needed to resolve that mismatch are not present. The VAR table also includes application components that this repository does not implement.
+
+`make reported-plots` redraws these coordinates with an archival label. New measurements are stored separately under `results/measured/`; see `docs/MEASUREMENTS.md`.

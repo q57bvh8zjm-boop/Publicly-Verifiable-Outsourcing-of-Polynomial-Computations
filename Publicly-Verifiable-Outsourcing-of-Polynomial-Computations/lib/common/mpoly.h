@@ -2,6 +2,7 @@
 #define MPOLY_H
 
 #include <time.h>
+#include <gmp.h>
 #include "fmpz.h"
 #include "fq.h"
 #include "fmpz_poly.h"
@@ -48,7 +49,7 @@ void fq_mat_scal_mul(fq_mat_t op, fq_t c, fq_ctx_t Fp);
 // ===========  ===========
 
 // fqfmpz
-void fq2fmpz(fmpz_t out, fq_t in, fq_ctx_t ctx);
+void fq2fmpz(fmpz_t out, const fq_t in, const fq_ctx_t ctx);
 
 // unsigned charfmpz
 void chars2fmpz(fmpz_t zo, unsigned char r[]);

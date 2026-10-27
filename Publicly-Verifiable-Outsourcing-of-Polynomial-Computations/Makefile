@@ -23,64 +23,57 @@ LIBS = $(FLINT_LIB_PATH) -lflint -lgmp -lsodium -lm
 LIB_DIR = lib/common
 PROTOCOLS_DIR = protocols
 BUILD_DIR = build
-COMMON_OBJ = $(BUILD_DIR)/mpoly.o $(BUILD_DIR)/extended_field.o
+COMMON_OBJ = $(BUILD_DIR)/mpoly.o $(BUILD_DIR)/crypto_util.o $(BUILD_DIR)/extended_field.o $(BUILD_DIR)/hss_paillier.o
 CORE_OBJ = $(BUILD_DIR)/scheme1.o $(BUILD_DIR)/scheme2.o $(BUILD_DIR)/scheme3.o $(BUILD_DIR)/protocol2.o
-all: dirs $(COMMON_OBJ) $(CORE_OBJ) scheme3_pir_optimize protocol2_pir_optimize
-	@echo "Core schemes and exploratory PIR programs compiled successfully."
+all: core $(BUILD_DIR)/benchmark
 
-test: dirs $(BUILD_DIR)/test_mpoly
+core: $(COMMON_OBJ) $(CORE_OBJ)
+
+test: $(BUILD_DIR)/test_mpoly $(BUILD_DIR)/test_protocols
 	$(BUILD_DIR)/test_mpoly
+	$(BUILD_DIR)/test_protocols
+
+test-hss: $(BUILD_DIR)/test_protocols
+	$(BUILD_DIR)/test_protocols --hss
+
+test-hss-high: $(BUILD_DIR)/test_protocols
+	$(BUILD_DIR)/test_protocols --hss-high
 
 validate:
 	python3 scripts/validate_artifact.py
 
-check: validate test all
-	@echo "Artifact validation, tests, and build completed successfully."
-core: dirs $(COMMON_OBJ) $(CORE_OBJ)
-	@echo "Core scheme objects compiled successfully."
-scheme3_pir_optimize: dirs $(COMMON_OBJ) $(BUILD_DIR)/scheme3.o $(PROTOCOLS_DIR)/scheme3_pir_optimize.c
-	$(CC) $(CFLAGS) $(PROTOCOLS_DIR)/scheme3_pir_optimize.c $(BUILD_DIR)/scheme3.o $(COMMON_OBJ) -o $(BUILD_DIR)/scheme3_pir_optimize $(LIBS)
-protocol2_pir_optimize: dirs $(COMMON_OBJ) $(BUILD_DIR)/protocol2.o $(PROTOCOLS_DIR)/protocol2_pir_optimize.c
-	$(CC) $(CFLAGS) $(PROTOCOLS_DIR)/protocol2_pir_optimize.c $(BUILD_DIR)/protocol2.o $(COMMON_OBJ) -o $(BUILD_DIR)/protocol2_pir_optimize $(LIBS)
-var_benchmark: dirs $(COMMON_OBJ) $(BUILD_DIR)/scheme1.o $(BUILD_DIR)/scheme2.o $(BUILD_DIR)/scheme3.o var_benchmark.c
-	$(CC) $(CFLAGS) var_benchmark.c $(BUILD_DIR)/scheme1.o $(BUILD_DIR)/scheme2.o $(BUILD_DIR)/scheme3.o $(COMMON_OBJ) -o $(BUILD_DIR)/var_benchmark $(LIBS)
+check: validate all test
+
+benchmark: $(BUILD_DIR)/benchmark
+
+var_benchmark: $(BUILD_DIR)/benchmark
+	$(BUILD_DIR)/benchmark 2 4 2 1 3 var
+
 reported-plots:
 	python3 scripts/plot_reported_results.py
 
-figures: reported-plots
-	@echo "Generated Figures 2, 3, 4, and 5 under results/plots/."
+figures figure2 figure3 figure4 figure5: reported-plots
 
-figure2: reported-plots
-	@echo "Generated results/plots/figure2_low_degree.png"
+$(BUILD_DIR):
+	mkdir -p $@
 
-figure3: reported-plots
-	@echo "Generated results/plots/figure3_thresholds.png"
+$(BUILD_DIR)/%.o: $(LIB_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-figure4: reported-plots
-	@echo "Generated results/plots/figure4_d4.png, figure4_d8.png, and figure4_d10.png"
+$(BUILD_DIR)/%.o: $(PROTOCOLS_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-figure5: reported-plots
-	@echo "Generated results/plots/figure5_gamma1_vs_pi3.png"
-dirs:
-	@mkdir -p $(BUILD_DIR)
-$(BUILD_DIR)/mpoly.o: $(LIB_DIR)/mpoly.c $(LIB_DIR)/mpoly.h
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/extended_field.o: $(LIB_DIR)/extended_field.c $(LIB_DIR)/extended_field.h
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/scheme1.o: $(PROTOCOLS_DIR)/scheme1.c $(PROTOCOLS_DIR)/scheme1.h $(LIB_DIR)/mpoly.h $(LIB_DIR)/extended_field.h
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/scheme2.o: $(PROTOCOLS_DIR)/scheme2.c $(PROTOCOLS_DIR)/scheme2.h $(LIB_DIR)/mpoly.h
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/scheme3.o: $(PROTOCOLS_DIR)/scheme3.c $(PROTOCOLS_DIR)/scheme3.h $(LIB_DIR)/mpoly.h
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/protocol2.o: $(PROTOCOLS_DIR)/protocol2.c $(PROTOCOLS_DIR)/protocol2.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/test_mpoly: tests/test_mpoly.c $(COMMON_OBJ) $(BUILD_DIR)/scheme1.o $(BUILD_DIR)/protocol2.o
+$(BUILD_DIR)/test_mpoly: tests/test_mpoly.c $(COMMON_OBJ) $(CORE_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
+
+$(BUILD_DIR)/test_protocols: tests/test_protocols.c $(COMMON_OBJ) $(CORE_OBJ)
+	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
+
+$(BUILD_DIR)/benchmark: benchmarks/benchmark.c $(COMMON_OBJ) $(CORE_OBJ)
+	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
+
 clean:
 	rm -rf $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)
-	@touch $(BUILD_DIR)/.gitkeep
-	@echo "Cleanup complete."
-.PHONY: all check core dirs clean figure2 figure3 figure4 figure5 figures reported-plots test validate var_benchmark
+
+-include $(COMMON_OBJ:.o=.d) $(CORE_OBJ:.o=.d)
+.PHONY: all core test test-hss test-hss-high validate check benchmark var_benchmark reported-plots figures figure2 figure3 figure4 figure5 clean

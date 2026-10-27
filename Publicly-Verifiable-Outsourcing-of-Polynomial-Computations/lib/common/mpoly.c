@@ -150,7 +150,7 @@ void fq_mat_scal_mul(fq_mat_t op, fq_t c, fq_ctx_t Fp) {
 // ===========  ===========
 
 // fqfmpz
-void fq2fmpz(fmpz_t out, fq_t in, fq_ctx_t ctx) {
+void fq2fmpz(fmpz_t out, const fq_t in, const fq_ctx_t ctx) {
     fmpz_poly_t out1;
     fmpz_poly_init(out1);
     fq_get_fmpz_poly(out1, in, ctx);

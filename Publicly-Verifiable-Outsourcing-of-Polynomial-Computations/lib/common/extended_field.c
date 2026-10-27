@@ -4,6 +4,7 @@
  */
 
 #include "extended_field.h"
+#include "crypto_util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,13 +21,13 @@ void ext_field_ctx_init(ext_field_ctx_t *ctx, const fmpz_t p, const fmpz_t c) {
     fmpz_init(ctx->c);
     fmpz_set(ctx->p, p);
     fmpz_set(ctx->c, c);
-    flint_randinit(ctx->state);
+
 }
 
 void ext_field_ctx_clear(ext_field_ctx_t *ctx) {
     fmpz_clear(ctx->p);
     fmpz_clear(ctx->c);
-    flint_randclear(ctx->state);
+
 }
 
 // ===========  ===========
@@ -62,8 +63,8 @@ void ext_field_elem_copy(ext_field_elem_t *dest, const ext_field_elem_t *src) {
 }
 
 void ext_field_elem_random(ext_field_elem_t *elem, ext_field_ctx_t *ctx) {
-    fmpz_randm(elem->a, ctx->state, ctx->p);
-    fmpz_randm(elem->b, ctx->state, ctx->p);
+    pv_random_below(elem->a, ctx->p);
+    pv_random_below(elem->b, ctx->p);
 }
 
 // ===========  ===========
@@ -102,10 +103,10 @@ void ext_field_elem_mul(ext_field_elem_t *result, const ext_field_elem_t *a, con
     fmpz_mul(temp1, a->a, b->a);    // a1*a2
     fmpz_mul(temp2, a->b, b->b);    // b1*b2
     fmpz_mul(temp2, temp2, ctx->c); // b1*b2*c
-    fmpz_sub(result->a, temp1, temp2); // a1*a2 - b1*b2*c
     
     fmpz_mul(temp3, a->a, b->b);    // a1*b2
     fmpz_mul(temp4, a->b, b->a);    // a2*b1
+    fmpz_sub(result->a, temp1, temp2); // write after reading both inputs
     fmpz_add(result->b, temp3, temp4); // a1*b2 + a2*b1
     
     // p

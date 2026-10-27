@@ -24,7 +24,7 @@ typedef struct {
 typedef struct {
     fmpz_t p;              // F_p
     fmpz_t c;
-    flint_rand_t state;    // 
+    /* Randomness is supplied by the OS-backed sampler. */
 } ext_field_ctx_t;
 
 // ===========  ===========

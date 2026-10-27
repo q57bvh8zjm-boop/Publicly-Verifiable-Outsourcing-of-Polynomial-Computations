@@ -1,0 +1,65 @@
+Validation on macOS arm64, 2026-10-27
+
+make check (clean build):
+python3 scripts/validate_artifact.py
+Archived CSV grid and source-comment checks passed (no performance validation).
+mkdir -p build
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c lib/common/mpoly.c -o build/mpoly.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c lib/common/crypto_util.c -o build/crypto_util.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c lib/common/extended_field.c -o build/extended_field.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c lib/common/hss_paillier.c -o build/hss_paillier.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c protocols/scheme1.c -o build/scheme1.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c protocols/scheme2.c -o build/scheme2.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c protocols/scheme3.c -o build/scheme3.o
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols -MMD -MP -c protocols/protocol2.c -o build/protocol2.o
+protocols/protocol2.c:161:5: warning: 'flint_randinit' is deprecated [-Wdeprecated-declarations]
+    flint_randinit(state);
+    ^
+/opt/homebrew/include/flint/flint.h:311:1: note: 'flint_randinit' has been explicitly marked deprecated here
+FLINT_DEPRECATED void flint_randinit(flint_rand_t);
+^
+/opt/homebrew/include/flint/flint.h:127:42: note: expanded from macro 'FLINT_DEPRECATED'
+# define FLINT_DEPRECATED __attribute__((deprecated))
+                                         ^
+protocols/protocol2.c:207:5: warning: 'flint_randclear' is deprecated [-Wdeprecated-declarations]
+    flint_randclear(state);
+    ^
+/opt/homebrew/include/flint/flint.h:312:1: note: 'flint_randclear' has been explicitly marked deprecated here
+FLINT_DEPRECATED void flint_randclear(flint_rand_t);
+^
+/opt/homebrew/include/flint/flint.h:127:42: note: expanded from macro 'FLINT_DEPRECATED'
+# define FLINT_DEPRECATED __attribute__((deprecated))
+                                         ^
+2 warnings generated.
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols benchmarks/benchmark.c build/mpoly.o build/crypto_util.o build/extended_field.o build/hss_paillier.o build/scheme1.o build/scheme2.o build/scheme3.o build/protocol2.o -o build/benchmark -L/opt/homebrew/lib -lflint -lgmp -lsodium -lm
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols tests/test_mpoly.c build/mpoly.o build/crypto_util.o build/extended_field.o build/hss_paillier.o build/scheme1.o build/scheme2.o build/scheme3.o build/protocol2.o -o build/test_mpoly -L/opt/homebrew/lib -lflint -lgmp -lsodium -lm
+cc -Wall -O2 -std=c99 -I/opt/homebrew/include -I/opt/homebrew/include/flint -Ilib/common -Iprotocols tests/test_protocols.c build/mpoly.o build/crypto_util.o build/extended_field.o build/hss_paillier.o build/scheme1.o build/scheme2.o build/scheme3.o build/protocol2.o -o build/test_protocols -L/opt/homebrew/lib -lflint -lgmp -lsodium -lm
+build/test_mpoly
+All polynomial evaluation tests passed.
+build/test_protocols
+FE/OV end-to-end, degree 1..10, threshold 1..3, tamper and malformed-key tests passed.
+
+make test-hss:
+Generating fresh >=3072-bit HSS key...
+HSS x^2 regression passed.
+HSS dense mixed degree-3 polynomial passed.
+HSS full-field inputs and coefficients passed.
+exit status: 0
+
+make test-hss-high:
+Generating range-sized degree-10 HSS key...
+HSS degree 4 at q-1 passed.
+HSS degree 6 at q-1 passed.
+HSS degree 8 at q-1 passed.
+HSS degree 10 at q-1 passed.
+exit status: 0
+
+AddressSanitizer + UndefinedBehaviorSanitizer:
+Fast evaluator and FE/OV suite passed. HSS integration output:
+Generating fresh >=3072-bit HSS key...
+HSS x^2 regression passed.
+HSS dense mixed degree-3 polynomial passed.
+HSS full-field inputs and coefficients passed.
+exit status: 0; no ASan/UBSan diagnostics. Leak detection disabled for HSS on macOS.
+
+Smoke measurements: 36 rows, all correctness flags equal 1; source hashes checked.
