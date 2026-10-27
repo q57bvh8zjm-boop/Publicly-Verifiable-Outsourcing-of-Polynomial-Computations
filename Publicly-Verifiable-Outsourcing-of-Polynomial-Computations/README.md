@@ -18,27 +18,33 @@ make test-hss-high
 
 On macOS, install `flint`, `gmp`, and `libsodium` with Homebrew and run the same Make targets from this directory. `make check` runs the fast suite. The separate HSS suites generate fresh large keys and can take several minutes.
 
-| Construction | Source | Current scope |
-|---|---|---|
-| Gamma1 | `protocols/scheme1.c` | Extension-field shares, encoded public verification key, client decoding |
-| Gamma2 | `protocols/scheme2.c` | Shamir shares over the full Ristretto scalar field, OV verification |
-| Gamma3 | `protocols/scheme3.c`, `lib/common/hss_paillier.c` | Two-server digit-decomposed Paillier HSS, all polynomial degrees, OV verification |
-| Pi3 | `protocols/protocol2.c` | Historical baseline; polynomial evaluator regression only |
+| Manuscript name | Code / CLI name | Source | Current scope |
+|---|---|---|---|
+| $\Gamma_{\mathrm{FE}}^{\mathrm{Sh}}$ | `Gamma_FE_Sh` | `protocols/gamma_fe_sh.c` | Extension-field shares, encoded public verification key, client decoding |
+| $\Gamma_{\mathrm{OV}}^{\mathrm{Sh}}$ | `Gamma_OV_Sh` | `protocols/gamma_ov_sh.c` | Shamir shares over the full Ristretto scalar field, OV verification |
+| $\Gamma_{\mathrm{OV}}^{\mathrm{HSS}}$ | `Gamma_OV_HSS` | `protocols/gamma_ov_hss.c`, `lib/common/hss_paillier.c` | Two-server digit-decomposed Paillier HSS, all polynomial degrees, OV verification |
+| $\Pi_3$ | `Pi3` | `protocols/protocol2.c` | Historical baseline; polynomial evaluator regression only |
 
-Gamma1 and Gamma2 use `k=d*t+1` servers. Gamma3 uses two servers and a threshold of one. The protocol APIs changed to separate public verification inputs from client secrets; the tests and benchmark are complete usage examples. Create public parameters with `pv_params_init` and clear every successful output with its matching cleanup function. Verification keys must come from the trusted query generator. These are in-process research APIs; they do not implement a network transport or wire-message parser.
+Gamma_FE_Sh and Gamma_OV_Sh use `k=d*t+1` servers. Gamma_OV_HSS uses two servers and a threshold of one. The protocol APIs changed to separate public verification inputs from client secrets; the tests and benchmark are complete usage examples. Create public parameters with `pv_params_init` and clear every successful output with its matching cleanup function. Verification keys must come from the trusted query generator. These are in-process research APIs; they do not implement a network transport or wire-message parser.
 
 ## Run measurements
 
 ```sh
 make benchmark
-./build/benchmark 2 200 2 1 10 dense
-./build/benchmark 2 4 2 1 10 var
+./build/benchmark Gamma_OV_Sh 200 2 1 10 dense
+./build/benchmark Gamma_OV_Sh 4 2 1 10 var
 python3 scripts/run_experiments.py --profile smoke --trials 3 --output results/measured/local-smoke
 ```
 
-The benchmark arguments are `SCHEME M D T TRIALS dense|var`. Every timing row is emitted only after successful verification and equality with native evaluation. The VAR workload computes the quadratic score of a one-lag vector autoregression forecast and also checks a direct matrix-vector reference. It measures this polynomial kernel; signatures, receipts, binding proofs, transport, and application preprocessing are outside the measurement.
+The benchmark arguments are `SCHEME M D T TRIALS dense|var`, with `SCHEME` set to `Gamma_FE_Sh`, `Gamma_OV_Sh`, or `Gamma_OV_HSS`. Legacy numeric selectors `1`, `2`, and `3` remain accepted; new output always uses the canonical names. Every timing row is emitted only after successful verification and equality with native evaluation. The VAR workload computes the quadratic score of a one-lag vector autoregression forecast and also checks a direct matrix-vector reference. It measures this polynomial kernel; signatures, receipts, binding proofs, transport, and application preprocessing are outside the measurement.
 
 The runner stores each command's CSV and stderr, a combined `raw.csv`, compiler/library information, source hashes, and machine metadata. Public workload fixtures are deterministic; cryptographic masks, scaling points, keys, and encryption coins use operating-system randomness. See [MEASUREMENTS.md](docs/MEASUREMENTS.md) for the timing definitions and the full-grid command.
+
+## Naming correspondence
+
+FE denotes field extensions, OV orthogonal vectors, Sh Shamir sharing, and HSS homomorphic secret sharing. The former Gamma1, Gamma2, and Gamma3 names map to `Gamma_FE_Sh`, `Gamma_OV_Sh`, and `Gamma_OV_HSS`, respectively. Source files and C API prefixes are `gamma_fe_sh`, `gamma_ov_sh`, and `gamma_ov_hss`. Include the corresponding header and use that prefix when updating code written against the former `scheme1`, `scheme2`, or `scheme3` APIs.
+
+Existing raw CSVs, execution logs, commands, and source hashes retain their original labels as recorded. Plotting translates those labels to the manuscript notation.
 
 ## Historical data
 

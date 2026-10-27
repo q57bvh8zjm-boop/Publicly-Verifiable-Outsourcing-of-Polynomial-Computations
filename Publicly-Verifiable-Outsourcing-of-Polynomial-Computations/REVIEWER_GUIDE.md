@@ -8,7 +8,7 @@ make test-hss         # x^2, dense mixed terms, full-field inputs, constants, ta
 make test-hss-high    # HSS powers 4, 6, 8, 10 at q-1 with a range-sized modulus
 ```
 
-The fast suite runs Gamma1 and Gamma2 at every degree 1–10 and threshold 1–3. It checks native equality, fresh query shares, changed outputs, malformed verification points, zero polynomials, and constants. The HSS suite also checks deterministic repeated evaluation and rejects malformed ciphertext components. Key generation and HSS evaluation can take several minutes.
+The fast suite runs Gamma_FE_Sh and Gamma_OV_Sh at every degree 1–10 and threshold 1–3. It checks native equality, fresh query shares, changed outputs, malformed verification points, zero polynomials, and constants. The HSS suite also checks deterministic repeated evaluation and rejects malformed ciphertext components. Key generation and HSS evaluation can take several minutes.
 
 Generate new measurements:
 

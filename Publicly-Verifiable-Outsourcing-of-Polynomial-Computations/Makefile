@@ -24,7 +24,7 @@ LIB_DIR = lib/common
 PROTOCOLS_DIR = protocols
 BUILD_DIR = build
 COMMON_OBJ = $(BUILD_DIR)/mpoly.o $(BUILD_DIR)/crypto_util.o $(BUILD_DIR)/extended_field.o $(BUILD_DIR)/hss_paillier.o
-CORE_OBJ = $(BUILD_DIR)/scheme1.o $(BUILD_DIR)/scheme2.o $(BUILD_DIR)/scheme3.o $(BUILD_DIR)/protocol2.o
+CORE_OBJ = $(BUILD_DIR)/gamma_fe_sh.o $(BUILD_DIR)/gamma_ov_sh.o $(BUILD_DIR)/gamma_ov_hss.o $(BUILD_DIR)/protocol2.o
 all: core $(BUILD_DIR)/benchmark
 
 core: $(COMMON_OBJ) $(CORE_OBJ)
@@ -47,7 +47,7 @@ check: validate all test
 benchmark: $(BUILD_DIR)/benchmark
 
 var_benchmark: $(BUILD_DIR)/benchmark
-	$(BUILD_DIR)/benchmark 2 4 2 1 3 var
+	$(BUILD_DIR)/benchmark Gamma_OV_Sh 4 2 1 3 var
 
 reported-plots:
 	python3 scripts/plot_reported_results.py
