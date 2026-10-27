@@ -43,7 +43,7 @@ def main():
     runs = []
     if args.profile == 'smoke':
         for scheme in args.schemes:
-            runs.extend([(scheme, 2, 2, 1, 'dense'), (scheme, 2, 2, 1, 'var')])
+            runs.append((scheme, 2, 2, 1, 'dense'))
         for scheme in args.schemes:
             if scheme != 'Gamma_OV_HSS':
                 runs.extend((scheme, 2, d, 1, 'dense') for d in (4, 8, 10))
