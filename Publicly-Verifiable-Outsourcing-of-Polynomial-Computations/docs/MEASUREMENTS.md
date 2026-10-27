@@ -1,5 +1,11 @@
 # Measurement contract
 
+## Paper VM experiments
+
+Use `scripts/run_vm_experiments.py` for the current paper grids. It runs C protocol phases across independent TCP workers, records every server time, and defines `T_s` as `server_max_ms`. It includes all three constructions and Pi3. `scripts/run_microbenchmarks.py` measures the six primitives with 100 trials by default. [VM_EXPERIMENTS.md](VM_EXPERIMENTS.md) gives the deployment commands, timing columns, and Figure 2–5 exports.
+
+## Local kernel harness
+
 `benchmarks/benchmark.c` performs actual query generation, all server evaluations, public verification, and reconstruction. It compares the final output with native polynomial evaluation before emitting a CSV row. The VAR case additionally checks direct matrix-vector multiplication for `sum_i (A*x)_i^2`, where `A_ij=1+((i+1)*(j+1) mod 7)`.
 
 | Column | Meaning |
@@ -28,7 +34,7 @@ python3 scripts/run_experiments.py --profile paper --schemes Gamma_FE_Sh Gamma_O
 python3 scripts/run_experiments.py --profile paper --schemes Gamma_OV_HSS --trials 30 --output results/measured/local-paper-hss
 ```
 
-The paper profile covers the Figure 2–4 parameter grids; it does not generate the historical Pi3 comparison. Dense high-degree HSS runs can be extremely expensive because each nonzero monomial is evaluated with modular exponentiations. The smoke profile is a functional timing sample, not a rerun of the paper's full grid or hardware setup. Use new output directory names; the runner refuses to overwrite previous runs.
+The local runner's `paper` profile is the earlier in-process grid. Use the VM runner above for current figure numbering, independent-server timings, and the Pi3 comparison. Use a new output directory for each run.
 
 The runner stores raw per-trial rows, per-command library/version reports, commands, timestamps, source hashes, revision, and environment information. Source hashes identify the measured code even when a run precedes its eventual commit. Report medians, variation, machine details, and trial counts when making performance claims.
 
