@@ -1,0 +1,5 @@
+/build/
+/results/plots/
+/results/measured/local*/
+__pycache__/
+*.pyc
