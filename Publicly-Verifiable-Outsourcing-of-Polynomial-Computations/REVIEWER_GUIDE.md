@@ -1,23 +1,38 @@
 # Reviewer quick start
 
-Run commands from `Publicly-Verifiable-Outsourcing-of-Polynomial-Computations/` after installing FLINT, GMP, libsodium, a C compiler, and Python 3.
+Run these commands from `Publicly-Verifiable-Outsourcing-of-Polynomial-Computations/` with FLINT, GMP, libsodium, a C compiler, and Python 3 installed.
+
+## Core protocols
 
 ```sh
-make check            # build, archive-grid checks, fast end-to-end regressions
-make test-hss         # x^2, dense mixed terms, full-field inputs, constants, tampering
-make test-hss-high    # HSS powers 4, 6, 8, 10 at q-1 with a range-sized modulus
+make check
+make test-hss
+make test-hss-high
 ```
 
-The fast suite runs Gamma_FE_Sh and Gamma_OV_Sh at every degree 1–10 and threshold 1–3. It checks native equality, fresh query shares, changed outputs, malformed verification points, zero polynomials, and constants. The HSS suite also checks deterministic repeated evaluation and rejects malformed ciphertext components. Key generation and HSS evaluation can take several minutes.
+The fast suite checks Gamma_FE_Sh and Gamma_OV_Sh at degrees 1–10 and thresholds 1–3: native equality, fresh shares, altered outputs, malformed verification points, zero polynomials, and constants. HSS tests add deterministic repeated evaluation, malformed ciphertext rejection, and high-degree inputs at `q-1`. HSS key generation and evaluation can take several minutes.
 
-Generate new measurements:
+## Private classification: Appendix G and Table 7
+
+With Python 3.9–3.12:
+
+```sh
+python3 -m pip install -r applications/private-classification/requirements.txt
+make classification-check
+```
+
+Expected checks are 48 correct protocol queries, 96 rejected response perturbations, and zero changed labels after quantization on all 1,381 test samples for each model. Inspect `summary.json`, the four CSVs, prediction TSVs, and `run-metadata.json` in `results/measured/local-classification/`. To rerun, choose a fresh `CLASSIFICATION_OUTPUT` directory.
+
+The [application README](applications/private-classification/README.md) gives the fixed split, original measurements, model regeneration command, and timing boundaries. Table 6 compares protocol properties and server counts; the application measurements are reported in Appendix G/Table 7.
+
+## Dense polynomial measurements
 
 ```sh
 python3 scripts/run_experiments.py --profile smoke --trials 3 --output results/measured/local-review
 ```
 
-Inspect `raw.csv`, individual trial files, and `metadata.json`. The benchmark records setup, query generation, server work, verification, reconstruction, and native evaluation separately. It stops on a failed correctness check.
+Inspect `raw.csv`, per-command files, and `metadata.json`. The benchmark records setup, query generation, server work, verification, reconstruction, and native evaluation, and stops on a failed correctness check.
 
-The [revision notes](docs/REVISION_NOTES.md) describe the changes and the remaining paper-level work. The [HSS instantiation note](docs/HSS_INSTANTIATION.md) gives the implemented integer-lifting model, parameter bound, setup trust, and security assumptions. The [measurement note](docs/MEASUREMENTS.md) defines all columns and the full experiment grid.
+[MEASUREMENTS.md](docs/MEASUREMENTS.md) defines the measured phases and full parameter grid. [HSS_INSTANTIATION.md](docs/HSS_INSTANTIATION.md) states the backend's integer-lifting model, parameter bound, setup trust, and security and correctness conditions. [REVISION_NOTES.md](docs/REVISION_NOTES.md) maps each implemented capability to its validation.
 
-`make reported-plots` only redraws historical coordinates. Those files do not establish performance of the repaired implementation. The former PIR estimators were removed from the active tree because they used the superseded API and estimated costs instead of measuring the complete protocol. Their source remains in Git history.
+`make reported-plots` redraws the archived paper coordinates described in [results/reported/README.md](results/reported/README.md). Raw execution measurements are stored separately from these transcriptions.

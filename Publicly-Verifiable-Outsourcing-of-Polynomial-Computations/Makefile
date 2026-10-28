@@ -1,6 +1,8 @@
 # Publicly Verifiable Outsourcing of Polynomial Computations
-# Build only source files that are actually present in this artifact.
+# Core protocols and fixed public polynomial classifiers.
 CC ?= gcc
+PYTHON ?= python3
+CLASSIFICATION_OUTPUT ?= results/measured/local-classification
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     ifneq (,$(wildcard /opt/homebrew/include/flint/flint.h))
@@ -40,14 +42,14 @@ test-hss-high: $(BUILD_DIR)/test_protocols
 	$(BUILD_DIR)/test_protocols --hss-high
 
 validate:
-	python3 scripts/validate_artifact.py
+	$(PYTHON) scripts/validate_artifact.py
 
 check: validate all test
 
 benchmark: $(BUILD_DIR)/benchmark
 
 reported-plots:
-	python3 scripts/plot_reported_results.py
+	$(PYTHON) scripts/plot_reported_results.py
 
 figures figure2 figure3 figure4 figure5: reported-plots
 
@@ -74,3 +76,15 @@ clean:
 
 -include $(COMMON_OBJ:.o=.d) $(CORE_OBJ:.o=.d)
 .PHONY: all core test test-hss test-hss-high validate check benchmark reported-plots figures figure2 figure3 figure4 figure5 clean
+
+# Compile the classification adapter with the -O3 setting used for Table 7.
+CLASSIFICATION_SRC = applications/private-classification/src/classification_bench.c $(LIB_DIR)/crypto_util.c $(LIB_DIR)/mpoly.c $(LIB_DIR)/extended_field.c $(PROTOCOLS_DIR)/gamma_fe_sh.c $(PROTOCOLS_DIR)/gamma_ov_sh.c
+CLASSIFICATION_HEADERS = $(wildcard $(LIB_DIR)/*.h) $(PROTOCOLS_DIR)/gamma_fe_sh.h $(PROTOCOLS_DIR)/gamma_ov_sh.h
+
+$(BUILD_DIR)/classification_bench: $(CLASSIFICATION_SRC) $(CLASSIFICATION_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -O3 $(CLASSIFICATION_SRC) -o $@ $(LIBS)
+
+classification-check classification-benchmark: $(BUILD_DIR)/classification_bench
+	$(PYTHON) applications/private-classification/run.py --output $(CLASSIFICATION_OUTPUT)
+
+.PHONY: classification-check classification-benchmark

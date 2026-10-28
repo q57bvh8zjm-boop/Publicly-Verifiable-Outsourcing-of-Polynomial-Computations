@@ -1,16 +1,15 @@
-# Revision responding to artifact review
+# Implementation and validation
 
-| Finding | Change | Evidence / remaining work |
+| Component | Implementation | Validation |
 |---|---|---|
-| HSS ignored quadratic and higher terms | Replace the linear-only implementation with a digit-decomposed Paillier backend and complete graded monomial traversal. | `test-hss` includes `x^2` at 2, mixed cubic terms, full-field inputs/coefficients, zero and constant polynomials. `test-hss-high` checks degrees 4–10 at `q-1`. |
-| Shamir masks came from 1–500; scaling points came from a small range | Sample coefficients uniformly by OS-backed rejection sampling over the full field; sample distinct nonzero scaling points over the full field. | No small-range sampler or unseeded FLINT RNG remains in Gamma_FE_Sh, Gamma_OV_Sh, and Gamma_OV_HSS. Tests exercise fresh query shares. Distribution follows from the sampler, not a frequency-test claim. |
-| Verification depended on client secrets | Give Gamma_FE_Sh a per-query public key containing encoded powers; give Gamma_OV_Sh and Gamma_OV_HSS verification functions only the public OV key and returned field values. | End-to-end tests use those interfaces, including rejected changes and malformed points. |
-| Extension multiplication failed for aliased operands | Compute both coordinates before writing either output. | End-to-end FE tests repeatedly use in-place multiplication at degrees 1–10 and thresholds 1–3. |
-| Old figure CSVs were presented as reproducibility evidence | Preserve them as explicitly archived transcriptions; add executable benchmarks and raw-log collection. | Measured data lives in `results/measured/`. The full paper grid and original VM platform have not been rerun by the smoke experiment. |
-| HSS assumptions and range were not tied to code | Document the exact backend, integer lifts, setup trust, component budget, modulus sizing, and KDM/PRF assumptions. | Post-evaluation-key adaptive correctness remains a separate proof obligation. |
+| Polynomial evaluation | Shared graded monomial order, including constant and mixed high-degree terms. | `make check` exercises degrees 1–10 and thresholds 1–3. |
+| HSS evaluation | Digit-decomposed Paillier backend with integer lifts and complete monomial traversal. | `make test-hss` covers quadratic and mixed cubic terms, full-field inputs, constants, and malformed ciphertexts; `make test-hss-high` covers powers 4–10 at `q-1`. |
+| Randomness | OS-backed rejection sampling across the full field; distinct nonzero scaling points. | Protocol tests check fresh query shares; sampler construction supplies uniformity. |
+| Public verification | FE uses an encoded public key; OV verification consumes the public OV key and field responses. | End-to-end tests check decoded equality, altered responses, and malformed points. |
+| Extension arithmetic | Multiplication computes both coordinates before writing the output. | FE tests exercise aliased operations through complete evaluations. |
+| Private classification | Fixed quadratic and cubic SVM scores over quantized Spambase features. | `make classification-check` verifies 48 protocol queries, 96 rejected response perturbations, and all test labels. |
+| Measurements | Executable benchmarks record phase times, raw data, source hashes, and environment metadata. | Timing rows are emitted after verification and native equality checks. |
 
-The historical Figure 4 data has Gamma_OV_HSS's `d=4,m=14` point below zero, while the supplied manuscript says Gamma_OV_HSS remains slower through `m=15`. The archived coordinates are preserved verbatim so the disagreement remains auditable. They must be replaced with measured results before using the figure to support the revised implementation.
+The private classification implementation corresponds to Appendix G/Table 7. Table 6 presents the protocol-feature comparison, including EPIC, vPIN, Conan, and the polynomial-outsourcing schemes. The paper's other applications describe polynomial mappings; the executable application in this release is private classification.
 
-## Manuscript changes still required
-
-The repository contains no TeX source for the supplied manuscript. Update its implementation section to identify the new HSS backend and its KDM assumption. Use the range calculation from the instantiation note with its stated model. Keep the stronger adaptive condition explicit until it has a proof. Replace performance claims based on historical data with new runs on a documented platform.
+The HSS backend's assumptions, parameter bounds, and post-evaluation-key adaptive-correctness requirement are documented in [HSS_INSTANTIATION.md](HSS_INSTANTIATION.md). Historical plot transcriptions and their provenance are documented in [results/reported/README.md](../results/reported/README.md). Current measurement boundaries are in [MEASUREMENTS.md](MEASUREMENTS.md).

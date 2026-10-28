@@ -1,0 +1,1 @@
+FLINT=3.3.1 GMP=6.3.0 sodium=1.0.20; isolated model=/Users/chenyuyao/Documents/Codex/2026-10-08/chu/work/application-screening-20261028/data/spam_svm2.fixture; complete native predictions=1381

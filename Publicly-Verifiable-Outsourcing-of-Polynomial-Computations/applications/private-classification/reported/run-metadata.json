@@ -1,0 +1,57 @@
+{
+  "platform": "macOS-15.6.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.9.7 (default, Apr  7 2024, 12:16:23) \n[Clang 15.0.0 (clang-1500.0.40.1)]",
+  "sequential_jobs": [
+    [
+      "spam_svm2",
+      1,
+      1,
+      12
+    ],
+    [
+      "spam_svm2",
+      2,
+      1,
+      12
+    ],
+    [
+      "spam_svm3",
+      1,
+      1,
+      12
+    ],
+    [
+      "spam_svm3",
+      2,
+      1,
+      12
+    ]
+  ],
+  "elapsed_seconds": 28.220284938812256,
+  "benchmark_sha256": "2990cdb4fcf9243622eb2579e5a3ed74759e2e7e3f2dec5468779d6bba17864f",
+  "source_sha256": "4d89de810e221d3734769955e91ff4fa0c6459169b815c9019b739e86df253c3",
+  "network": "No network measurements; serialization is measured; server times are measured sequentially on one host.",
+  "timing": "One warmup query omitted per job, 12 independent queries, 1000 native inner repetitions, five field-native repetitions.",
+  "crypto": "Unmodified frozen-core encoding / verification / decoding; Ristretto255 scalar field; OS cryptographic randomness. Application-specific polynomial evaluation adapters only.",
+  "provenance": "Subset of the 2026-10-28 application-screening run; original timings retained. Core source files are byte-identical to the main implementation.",
+  "original_core_sha256": {
+    "lib/common/crypto_util.h": "05d1356c410b1479f01fc167f6520e85d558d2ce361a2a7e1844739f620122d7",
+    "lib/common/hss_paillier.h": "43b5da10d5604895f63e44465fd164fce3051a0c5204ab582480a27ade4f0350",
+    "lib/common/mpoly.c": "39576692db54b0d568f597f03bd5246e6a352187e0c87d9aafc5ca48c15389c6",
+    "lib/common/extended_field.h": "1fc8b63f5a6ab7e60322e39940cb48a7d5872f203af083a6541c0a7499ddbabd",
+    "lib/common/crypto_util.c": "89484a05ae58900c66f816d34084ff47d1022ab552c1c29b0d921794b1b23a19",
+    "lib/common/hss_paillier.c": "225cab50da05b72d99d894beca0dddd198f12ad7bfdbe5186bce0419aae2c91c",
+    "lib/common/extended_field.c": "b132f7a83a99c2d8c42da328576fa5a21720786e32a233725b06276108747a87",
+    "lib/common/README_extended_field.md": "6fd799744b975b4344f8daeb7bfc14f071eb6cc0c8573e3d7e8d8c6eed8f40f4",
+    "lib/common/mpoly.h": "551d4dedec1ee9befc49e2ce4b755141c7629552d85681199d2f131c4e4e8756",
+    "protocols/gamma_fe_sh.c": "620ef310dfa38ad8f461bddfb3e3f2cb9fb31306e2ba67ecc9cc16ce0f25ea0d",
+    "protocols/gamma_ov_hss.c": "be621cc03b991799d0f3bdd5ae95f418cbaa879b1283a979b6534f74f6bd026e",
+    "protocols/protocol2.h": "3ff048b5e83ab47c130f9add03458b37178f355f430b7d7a1274b994c7001c97",
+    "protocols/gamma_ov_sh.h": "2c73f6d7be9f38173ceb93ddee1ffa033c175af9173a66a6b3b72a9d8562e211",
+    "protocols/gamma_fe_sh.h": "30d374dfa80e28bc9ee311b1621704b064a22bcfb287617a06cec0e124084b91",
+    "protocols/gamma_ov_hss.h": "8b7eb28702bdf0d51e1a399514aca3edff2cf90a1fb449f41e405df813b5776b",
+    "protocols/protocol2.c": "1d08096acef6bb9c77de9a5e423af181c46e5ba51cc8f1947a660ee1efbada7a",
+    "protocols/gamma_ov_sh.c": "5b26cd087a42731970d230611cb2f972d95fb6f61d8aa02f11b718e535f68185"
+  }
+}
